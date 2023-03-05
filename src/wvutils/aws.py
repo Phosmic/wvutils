@@ -19,7 +19,7 @@ from wvutils.restruct import json_loads
 
 __all__ = [
     "athena_execute_query",
-    "athena_retrieve_queries",
+    "athena_retrieve_query",
     "athena_stop_query",
     "boto3_client",
     "download_from_s3",
@@ -250,7 +250,7 @@ def athena_execute_query(
     return qeid
 
 
-def athena_retrieve_queries(
+def athena_retrieve_query(
     qeid: str,
     database_name: str,
     region_name: AWSRegion,
