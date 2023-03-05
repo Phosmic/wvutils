@@ -11,10 +11,10 @@ from moto import mock_s3, mock_secretsmanager
 
 from wvutils.aws import (
     boto3_client,
+    clear_boto3_sessions,
     download_from_s3,
     get_boto3_session,
     parse_s3_uri,
-    clear_boto3_sessions,
     secrets_fetch,
     upload_bytes_to_s3,
     upload_file_to_s3,

@@ -294,7 +294,7 @@ Stop the execution of a query in Athena.
 
 # `wvutils.path`
 
-Path Utilities
+Utilities for working with paths.
 
 This module provides utilities for working with paths.
 

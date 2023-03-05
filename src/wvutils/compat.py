@@ -1,4 +1,4 @@
-"""Compatibility Variables and Functions
+"""Compatibility variables and functions.
 
 This module contains variables and functions that are used to provide
 compatibility across different Python versions and operating systems.

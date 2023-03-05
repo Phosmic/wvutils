@@ -13,9 +13,9 @@ from botocore.exceptions import ClientError
 
 from wvutils.typing import AWSRegion, FilePath
 
+from wvutils.general import unnest_key
 from wvutils.path import resolve_path
 from wvutils.restruct import json_loads
-from wvutils.general import unnest_key
 
 __all__ = [
     "athena_execute_query",

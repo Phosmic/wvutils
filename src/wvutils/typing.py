@@ -1,14 +1,13 @@
-"""Custom Data Types"""
+"""Custom type aliases and type variables.
+
+This module contains custom type aliases and type variables used throughout the package.
+"""
 
 import collections
 import io
 from collections.abc import Hashable
 from os import PathLike
-from typing import (
-    Literal,
-    TypeAlias,
-    TypeVar,
-)
+from typing import Literal, TypeAlias  # TypeVar
 
 __all__ = [
     "AWSRegion",

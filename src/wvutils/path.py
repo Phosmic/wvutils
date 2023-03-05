@@ -1,4 +1,4 @@
-"""Path Utilities
+"""Utilities for working with paths.
 
 This module provides utilities for working with paths.
 """
