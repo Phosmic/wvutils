@@ -3,25 +3,62 @@ import unittest
 from wvutils.args import nonempty_string, safechars_string
 
 
-class TestStringMethods(unittest.TestCase):
+class TestNonEmptyString(unittest.TestCase):
     def test_nonempty_string(self):
-        # Test using a non-empty string
         self.assertEqual(nonempty_string("test")("a"), "a")
-        # Test using a non-empty string surrounded by whitespace
+
+    def test_nonempty_surrounded_by_whitespace(self):
         self.assertEqual(nonempty_string("test")(" a "), "a")
-        # Test using an empty string (should raise ValueError)
+
+    def test_empty(self):
         with self.assertRaises(ValueError):
             nonempty_string("test")("")
 
-    def test_safechars_string(self):
-        # Test using a character that is allowed by default
+
+class TestSafeCharsString(unittest.TestCase):
+    def test_safe_using_default(self):
         self.assertEqual(safechars_string("test")("a"), "a")
-        # Test using a character that is not allowed by default
+
+    def test_unsafe_using_default(self):
         with self.assertRaises(ValueError):
             safechars_string("test")("$")
 
-        # Test using a character that is allowed using custom allowed_chars
-        self.assertEqual(safechars_string("test", allowed_chars="abc")("a"), "a")
-        # Test using a character that is not allowed using custom allowed_chars
+    def test_safe_using_custom_allowed_chars_string(self):
+        self.assertEqual(
+            safechars_string("test", allowed_chars="abc")("a"),
+            "a",
+        )
+
+    def test_unsafe_using_custom_allowed_chars_string(self):
         with self.assertRaises(ValueError):
             safechars_string("test", allowed_chars="abc")("d")
+
+    def test_safe_using_custom_allowed_chars_set(self):
+        self.assertEqual(
+            safechars_string("test", allowed_chars={"a", "b", "c"})("a"),
+            "a",
+        )
+
+    def test_unsafe_using_custom_allowed_chars_set(self):
+        with self.assertRaises(ValueError):
+            safechars_string("test", allowed_chars={"a", "b", "c"})("d")
+
+    def test_safe_using_custom_allowed_chars_tuple(self):
+        self.assertEqual(
+            safechars_string("test", allowed_chars=("a", "b", "c"))("a"),
+            "a",
+        )
+
+    def test_unsafe_using_custom_allowed_chars_tuple(self):
+        with self.assertRaises(ValueError):
+            safechars_string("test", allowed_chars=("a", "b", "c"))("d")
+
+    def test_safe_using_custom_allowed_chars_list(self):
+        self.assertEqual(
+            safechars_string("test", allowed_chars=["a", "b", "c"])("a"),
+            "a",
+        )
+
+    def test_unsafe_using_custom_allowed_chars_list(self):
+        with self.assertRaises(ValueError):
+            safechars_string("test", allowed_chars=["a", "b", "c"])("d")
