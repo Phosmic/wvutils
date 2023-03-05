@@ -263,34 +263,36 @@ def athena_retrieve_query(
         region_name (AWSRegion): Region name for Athena.
 
     Returns:
-        str | None: Current status of the query, or S3 URI of the results.
+        str | None: Current status of the query, or S3 URI where results are stored.
+
+    Raises:
+        ValueError: If the query execution ID is unknown or missing.
     """
     with boto3_client("athena", region_name=region_name) as athena_client:
         response = athena_client.get_query_execution(QueryExecutionId=qeid)
 
     state = unnest_key(response, "QueryExecution", "Status", "State")
     if state == "SUCCEEDED":
-        # Success
-        logger.info(
-            f"Finished executing QEID {qeid} on {database_name} ({region_name})"
-        )
-        # S3 URI of results
+        logger.info(f"QEID {qeid} succeeded on {database_name} ({region_name})")
+        # S3 URI where results are stored
         return unnest_key(
             response, "QueryExecution", "ResultConfiguration", "OutputLocation"
         )
-    if state == "RUNNING":
-        # Running
-        logger.debug(f"Still executing QEID {qeid} on {database_name} ({region_name})")
+    elif state == "RUNNING":
+        logger.debug(f"QEID {qeid} is running on {database_name} ({region_name})")
+        return state
     elif state == "QUEUED":
-        # Queued
-        logger.debug(f"Still executing QEID {qeid} on {database_name} ({region_name})")
+        logger.debug(f"QEID {qeid} is queued on {database_name} ({region_name})")
+        return state
     elif state == "FAILED":
-        # Failure
-        logger.info(
-            f"Failure to execute QEID {qeid} on {database_name} ({region_name})"
-        )
-    # else: TODO: Raise error here?
-    return state
+        logger.info(f"QEID {qeid} failed to execute on {database_name} ({region_name})")
+        return state
+    elif state == "CANCELLED":
+        # TODO: Validate that there is in-fact a cancelled state.
+        logger.info(f"QEID {qeid} was cancelled on {database_name} ({region_name})")
+        return state
+    else:
+        raise ValueError(f"Unknown or missing state {state} for QEID {qeid}")
 
 
 def athena_stop_query(qeid: str, region_name: AWSRegion) -> None:
