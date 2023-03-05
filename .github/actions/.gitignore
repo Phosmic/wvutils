@@ -1,0 +1,12 @@
+# Ignore everything
+*
+
+# Except
+!build_wvutils/
+!build_wvutils/*
+!run-tests/
+!run-tests/*
+!setup-conda/
+!setup-conda/*
+
+!.gitignore

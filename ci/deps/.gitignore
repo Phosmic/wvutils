@@ -1,0 +1,8 @@
+# Ignore everything
+*
+
+# Except
+!actions-310.yml
+!actions-311.yml
+
+!.gitignore

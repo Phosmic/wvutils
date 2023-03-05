@@ -1,0 +1,12 @@
+# Ignore everything
+*
+
+# Except
+!wvutils/
+!wvutils/*
+
+!LICENSE
+!README.md
+!.gitignore
+!.git/
+!.git/*

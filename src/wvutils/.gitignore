@@ -1,0 +1,21 @@
+# Ignore everything
+*
+
+# Except
+!__init__.py
+!args.py
+!aws.py
+!compat.py
+!constants.py
+!errors.py
+!path.py
+!proxies.py
+!restruct.py
+!typing.py
+!utils.py
+
+!LICENSE
+!README.md
+!.gitignore
+!.git/
+!.git/*

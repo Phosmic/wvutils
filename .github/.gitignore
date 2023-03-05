@@ -1,0 +1,12 @@
+# Ignore everything
+*
+
+# Except
+!actions/
+!actions/*
+!ISSUE_TEMPLATE/
+!ISSUE_TEMPLATE/*
+!workflows/
+!workflows/*
+
+!.gitignore

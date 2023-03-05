@@ -1,0 +1,15 @@
+# Ignore everything
+*
+
+# Except
+!test_args.py
+!test_aws.py
+!test_path.py
+!test_proxies.py
+!test_utils.py
+
+!LICENSE
+!README.md
+!.gitignore
+!.git/
+!.git/*

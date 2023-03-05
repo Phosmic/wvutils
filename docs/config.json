@@ -1,0 +1,20 @@
+{
+    "packages_dir": "../src",
+    "packages": ["wvutils"],
+    "output_file": "README.md",
+    "main_template": "main.md.jinja",
+    "templates_dir": "./templates",
+    "rendered_filename": "rendered_libs.md",
+    "template_data": {
+        "pypi": {
+            "name": "wvutils"
+        },
+        "repo": {
+            "name": "wvutils",
+            "owner": "Phosmic",
+            "badge_style": "flat-square",
+            "primary_branch": "master",
+            "actions_template": "ubuntu.yml"
+        }
+    }
+}
