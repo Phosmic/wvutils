@@ -272,6 +272,7 @@ def athena_retrieve_query(
         response = athena_client.get_query_execution(QueryExecutionId=qeid)
 
     state = unnest_key(response, "QueryExecution", "Status", "State")
+    # Reference: https://docs.amazonaws.cn/athena/latest/APIReference/API_QueryExecutionStatus.html
     if state == "SUCCEEDED":
         logger.info(f"QEID {qeid} succeeded on {database_name} ({region_name})")
         # S3 URI where results are stored
@@ -288,7 +289,6 @@ def athena_retrieve_query(
         logger.info(f"QEID {qeid} failed to execute on {database_name} ({region_name})")
         return state
     elif state == "CANCELLED":
-        # TODO: Validate that there is in-fact a cancelled state.
         logger.info(f"QEID {qeid} was cancelled on {database_name} ({region_name})")
         return state
     else:
