@@ -44,11 +44,8 @@ from wvutils.errors import (
 from wvutils.typing import (
     FilePath,
     JSONEncodable,
-    JSONEncoded,
     MD5Hashable,
-    MD5Hashed,
     PickleSerializable,
-    PickleSerialized,
 )
 
 from wvutils.path import resolve_path
@@ -72,14 +69,14 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def json_dumps(obj: JSONEncodable) -> JSONEncoded:
+def json_dumps(obj: JSONEncodable) -> str:
     """Encode an Object as JSON
 
     Args:
         obj (JSONEncodable): Object to encode.
 
     Returns:
-        JSONEncoded: Object encoded as JSON.
+        str: Object encoded as JSON.
 
     Raises:
         JSONEncodeError: If the object could not be encoded.
@@ -90,14 +87,14 @@ def json_dumps(obj: JSONEncodable) -> JSONEncoded:
         raise err
 
 
-def jsonl_dumps(objs: Iterable[JSONEncodable]) -> JSONEncoded:
+def jsonl_dumps(objs: Iterable[JSONEncodable]) -> str:
     """Encode Objects as JSONL
 
     Args:
         objs (Iterable[JSONEncodable]): Objects to encode.
 
     Returns:
-        JSONEncoded: Objects encoded as JSONL.
+        str: Objects encoded as JSONL.
 
     Raises:
         JSONEncodeError: If the object could not be encoded.
@@ -138,11 +135,11 @@ def jsonl_dump(file_path: str, objs: Iterable[JSONEncodable]) -> None:
         wf.write(jsonl_dumps(objs))
 
 
-def json_loads(encoded_obj: JSONEncoded) -> JSONEncodable:
+def json_loads(encoded_obj: str) -> JSONEncodable:
     """Decode a JSON-Encoded Object
 
     Args:
-        encoded_obj (JSONEncoded): Object to decode.
+        encoded_obj (str): Object to decode.
 
     Returns:
         JSONEncodable: Decoded object.
@@ -178,6 +175,7 @@ def json_load(file_path: FilePath) -> JSONEncodable:
 
 def jsonl_loader(
     file_path: FilePath,
+    *,
     allow_empty_lines: bool = True,
 ) -> Generator[JSONEncodable, None, None]:
     """Decode a File Containing JSON-Encoded Objects in JSONL
@@ -249,14 +247,14 @@ def squeegee_loader(file_path: FilePath) -> Generator[JSONEncodable, None, None]
                     yield single_content
 
 
-def gen_hash(obj: MD5Hashable) -> MD5Hashed | None:
+def gen_hash(obj: MD5Hashable) -> str | None:
     """Create an MD5 Hash from an JSONEncodable Object
 
     Args:
         obj (MD5Hashable): Object to hash.
 
     Returns:
-        MD5Hashed | None: MD5 hash of the object or None if object was an empty iterable.
+        str | None: MD5 hash of the object, or None if object was an empty iterable.
 
     Raises:
         HashEncodeError: If the object could not be encoded.
@@ -269,11 +267,13 @@ def gen_hash(obj: MD5Hashable) -> MD5Hashed | None:
         elif isinstance(obj, str):
             # Encode string
             obj_b = obj.encode("utf-8")
-        elif isinstance(obj, (list, collections.deque)):
-            # Encode list or deque as JSONL-encoded list
-            # TODO: Could add support for tuple and set, and combine with list below since 'jsonl_dumps' accepts iterables.
-            #       Worth noting that this may confuse the user, as hashing (0, 1, 2) or {0, 1, 2} or [0, 1, 2] would be effectively the same.
+        elif isinstance(obj, list):
+            # Encode list as JSONL-encoded list
             obj_b = jsonl_dumps(obj).encode("utf-8")
+        elif isinstance(obj, (tuple, collections.deque)):
+            # Encode tuple or deque as JSONL-encoded list
+            obj_list = list(obj)
+            obj_b = jsonl_dumps(obj_list).encode("utf-8")
         elif isinstance(obj, (dict, int, float, bool)):
             # Encode remaining built-ins as JSON
             obj_b = json_dumps(obj).encode("utf-8")
@@ -302,14 +302,14 @@ def pickle_dump(file_path: FilePath, obj: PickleSerializable) -> None:
             raise err
 
 
-def pickle_dumps(obj: PickleSerializable) -> PickleSerialized:
+def pickle_dumps(obj: PickleSerializable) -> bytes:
     """Serialize an Object as a Pickle
 
     Args:
         obj (PickleSerializable): Object to serialize.
 
     Returns:
-        PickleSerialized: Serialized object.
+        bytes: Serialized object.
 
     Raises:
         PickleEncodeError: If the object could not be encoded.
@@ -341,11 +341,11 @@ def pickle_load(file_path: FilePath) -> PickleSerializable:
             raise err
 
 
-def pickle_loads(serialized_obj: PickleSerialized) -> PickleSerializable:
+def pickle_loads(serialized_obj: bytes) -> PickleSerializable:
     """Deserialize Pickle-Serialized Object
 
     Args:
-        serialized_obj (PickleSerialized): Object to deserialize.
+        serialized_obj (bytes): Object to deserialize.
 
     Returns:
         PickleSerializable: Deserialized object.

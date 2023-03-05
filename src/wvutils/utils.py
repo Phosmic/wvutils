@@ -37,21 +37,21 @@ def _count_generator(bytes_io: BufferedReader) -> Generator[bytes, None, None]:
         b = reader(1024 * 1024)
 
 
-def count_lines_in_file(input_path: FilePath) -> int:
+def count_lines_in_file(file_path: FilePath) -> int:
     """Count the Number of Lines in a File
 
     All files have at least 1 line:
         number of lines = # of newlines + 1
 
     Args:
-        input_path (FilePath): Path of the file to count lines in.
+        file_path (FilePath): Path of the file to count lines in.
 
     Returns:
         int: Total number of lines in the file.
     """
-    input_path = resolve_path(input_path)
+    file_path = resolve_path(file_path)
     num_lines = 1
-    with open(input_path, mode="rb") as rbf:
+    with open(file_path, mode="rb") as rbf:
         for buffer in _count_generator(rbf):
             num_lines += buffer.count(b"\n")
     return num_lines

@@ -86,6 +86,9 @@ def render_library_contents(
         rendered_contents,
     )
 
+    # Fix trailing newlines with two spaces
+    rendered_contents = re.sub(r"\n  \n", "\n\n", rendered_contents)
+
     # Condense 3 or more newlines to 2
     rendered_contents = re.sub(r"\n{3,}", "\n\n", rendered_contents)
 

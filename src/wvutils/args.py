@@ -20,11 +20,14 @@ def nonempty_string(name: str) -> Callable:
     """Ensure a String is Non-Empty
 
     Example Usage:
-        ```python
-        @classmethod
-        def _cli_setup_parser(cls, subparser):
-            subparser.add_argument("hashtag", type=nonempty_string("hashtag"), help="A hashtag (without #)")
-        ```
+
+    ```python
+    subparser.add_argument(
+        "hashtag",
+        type=nonempty_string("hashtag"),
+        help="A hashtag (without #)",
+    )
+    ```
 
     Args:
         name (str): Name of the function, used for debugging.
@@ -52,9 +55,11 @@ def safechars_string(
     Example Usage:
 
     ```python
-    @classmethod
-    def _cli_setup_parser(cls, subparser):
-        subparser.add_argument("--session-key", type=safechars_string, help="Key to share a single token across processes")
+    subparser.add_argument(
+        "--session-key",
+        type=safechars_string,
+        help="Key to share a single token across processes",
+    )
     ```
 
     Args:
