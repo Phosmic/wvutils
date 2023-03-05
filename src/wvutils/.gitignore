@@ -8,11 +8,11 @@
 !compat.py
 !constants.py
 !errors.py
+!general.py
 !path.py
 !proxies.py
 !restruct.py
 !typing.py
-!utils.py
 
 !LICENSE
 !README.md

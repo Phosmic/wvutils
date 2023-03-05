@@ -79,18 +79,25 @@ def render_library_contents(
     with open(output_path, mode="r", encoding="utf-8") as file:
         rendered_contents = file.read()
 
-    # Fix some missing highlighting in the `**Returns**` sections
+    # NOTE: Any types containing a "_" will be excluded from this fix
+    # Fix some missing highlighting in the "**Returns**" and "**Yields**" sections
     rendered_contents = re.sub(
-        r"\*\*Returns\*\*:\n\n  ([a-zA-Z0-9_, \|\[\]]+): ",
-        r"**Returns**:\n\n- `\1` - ",
+        r"\*\*(Returns|Yields)\*\*:\n\n  ([a-zA-Z0-9, \|\[\]]+): ",
+        r"**\1**:\n\n- `\2` - ",
+        rendered_contents,
+    )
+    # Change the Returns and Yields code blocks to italics
+    rendered_contents = re.sub(
+        r"\*\*(Returns|Yields)\*\*:\n\n- `([a-zA-Z0-9, \|\[\]]+)` - ",
+        r"**\1**:\n\n- _\2_ - ",
         rendered_contents,
     )
 
     # Fix trailing newlines with two spaces
     rendered_contents = re.sub(r"\n  \n", "\n\n", rendered_contents)
 
-    # Condense 3 or more newlines to 2
-    rendered_contents = re.sub(r"\n{3,}", "\n\n", rendered_contents)
+    # Condense consecutive newlines to two
+    rendered_contents = re.sub(r"\n{2,}", "\n\n", rendered_contents)
 
     # Write the corrected contents
     with open(output_path, mode="w", encoding="utf-8") as file:

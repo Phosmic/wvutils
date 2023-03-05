@@ -1,29 +1,31 @@
-"""Restructure Data
+"""Utilities for restructuring data.
 
-This module contains functions for restructuring data.
+This module provides utilities for restructuring data, including serialization and hashing.
 
 JSON
 
-| Python                                     | JSON        |
-| :----------------------------------------- | :---------- |
-| dict                                       | object      |
-| list, tuple                                | array       |
-| str                                        | string      |
-| int, float, int- & float-derived enums     | number      |
-| True                                       | true        |
-| False                                      | false       |
-| None                                       | null        |
+| Python                                 | JSON   |
+| :------------------------------------- | :----- |
+| dict                                   | object |
+| list, tuple                            | array  |
+| str                                    | string |
+| int, float, int- & float-derived enums | number |
+| True                                   | true   |
+| False                                  | false  |
+| None                                   | null   |
 
 Hash
 
--   No content
+> No content.
 
 Pickle
 
--   An important difference between cloudpickle and pickle is that cloudpickle can serialize a function or class by value, whereas pickle can only serialize it by reference.
-    Serialization by reference treats functions and classes as attributes of modules, and pickles them through instructions that trigger the import of their module at load time.
-    Serialization by reference is thus limited in that it assumes that the module containing the function or class is available/importable in the unpickling environment.
-    This assumption breaks when pickling constructs defined in an interactive session, a case that is automatically detected by cloudpickle, that pickles such constructs by value.
+> An important difference between cloudpickle and pickle is that cloudpickle can serialize a function or class by value, whereas pickle can only serialize it by reference.
+> Serialization by reference treats functions and classes as attributes of modules, and pickles them through instructions that trigger the import of their module at load time.
+> Serialization by reference is thus limited in that it assumes that the module containing the function or class is available/importable in the unpickling environment.
+> This assumption breaks when pickling constructs defined in an interactive session, a case that is automatically detected by cloudpickle, that pickles such constructs by value.
+
+Read more: https://github.com/cloudpipe/cloudpickle/blob/master/README.md#overriding-pickles-serialization-mechanism-for-importable-constructs
 """
 
 import collections
@@ -70,7 +72,7 @@ logger = logging.getLogger(__name__)
 
 
 def json_dumps(obj: JSONEncodable) -> str:
-    """Encode an Object as JSON
+    """Encode an object as JSON.
 
     Args:
         obj (JSONEncodable): Object to encode.
@@ -88,7 +90,7 @@ def json_dumps(obj: JSONEncodable) -> str:
 
 
 def jsonl_dumps(objs: Iterable[JSONEncodable]) -> str:
-    """Encode Objects as JSONL
+    """Encode objects as JSONL.
 
     Args:
         objs (Iterable[JSONEncodable]): Objects to encode.
@@ -103,7 +105,7 @@ def jsonl_dumps(objs: Iterable[JSONEncodable]) -> str:
 
 
 def json_dump(file_path: str, obj: JSONEncodable) -> None:
-    """Encode an Object as JSON and Write it to a File
+    """Encode an object as JSON and write it to a file.
 
     Args:
         file_path (str): Path of the file to open.
@@ -121,7 +123,7 @@ def json_dump(file_path: str, obj: JSONEncodable) -> None:
 
 
 def jsonl_dump(file_path: str, objs: Iterable[JSONEncodable]) -> None:
-    """Encode Objects as JSONL and Write them to a File
+    """Encode objects as JSONL and write them to a file.
 
     Args:
         file_path (str): Path of the file to open.
@@ -136,7 +138,7 @@ def jsonl_dump(file_path: str, objs: Iterable[JSONEncodable]) -> None:
 
 
 def json_loads(encoded_obj: str) -> JSONEncodable:
-    """Decode a JSON-Encoded Object
+    """Decode a JSON-encoded object.
 
     Args:
         encoded_obj (str): Object to decode.
@@ -154,7 +156,7 @@ def json_loads(encoded_obj: str) -> JSONEncodable:
 
 
 def json_load(file_path: FilePath) -> JSONEncodable:
-    """Decode a File Containing a JSON-Encoded Object
+    """Decode a file containing a JSON-encoded object.
 
     Args:
         file_path (FilePath): Path of the file to open.
@@ -178,7 +180,7 @@ def jsonl_loader(
     *,
     allow_empty_lines: bool = True,
 ) -> Generator[JSONEncodable, None, None]:
-    """Decode a File Containing JSON-Encoded Objects in JSONL
+    """Decode a file containing JSON-encoded objects, one per line.
 
     Args:
         file_path (FilePath): Path of the file to open.
@@ -205,7 +207,7 @@ def jsonl_loader(
 
 
 def squeegee_loader(file_path: FilePath) -> Generator[JSONEncodable, None, None]:
-    """Automatically Decode a File Containing JSON-Encoded Objects
+    """Automatically decode a file containing JSON-encoded objects.
 
     Supports multiple formats (JSON, JSONL, JSONL of JSONL, etc).
 
@@ -248,7 +250,9 @@ def squeegee_loader(file_path: FilePath) -> Generator[JSONEncodable, None, None]
 
 
 def gen_hash(obj: MD5Hashable) -> str | None:
-    """Create an MD5 Hash from an JSONEncodable Object
+    """Create an MD5 hash from a hashable object.
+
+    Note: Tuples and sets are not hashable, so they are converted to lists.
 
     Args:
         obj (MD5Hashable): Object to hash.
@@ -286,7 +290,7 @@ def gen_hash(obj: MD5Hashable) -> str | None:
 
 
 def pickle_dump(file_path: FilePath, obj: PickleSerializable) -> None:
-    """Serialize an Object as a Pickle and Write it to a File
+    """Serialize an object as a pickle and write it to a file.
 
     Args:
         file_path (FilePath): Path of the file to write.
@@ -303,7 +307,7 @@ def pickle_dump(file_path: FilePath, obj: PickleSerializable) -> None:
 
 
 def pickle_dumps(obj: PickleSerializable) -> bytes:
-    """Serialize an Object as a Pickle
+    """Serialize an object as a pickle.
 
     Args:
         obj (PickleSerializable): Object to serialize.
@@ -321,9 +325,9 @@ def pickle_dumps(obj: PickleSerializable) -> bytes:
 
 
 def pickle_load(file_path: FilePath) -> PickleSerializable:
-    """Deserialize Pickle-Serialized Object from a File
+    """Deserialize a pickle-serialized object from a file.
 
-    NOTE: Not safe for large files.
+    Note: Not safe for large files.
 
     Args:
         file_path (FilePath): Path of the file to open.
@@ -342,7 +346,7 @@ def pickle_load(file_path: FilePath) -> PickleSerializable:
 
 
 def pickle_loads(serialized_obj: bytes) -> PickleSerializable:
-    """Deserialize Pickle-Serialized Object
+    """Deserialize a pickle-serialized object.
 
     Args:
         serialized_obj (bytes): Object to deserialize.

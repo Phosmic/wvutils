@@ -60,9 +60,9 @@ python3 -m pip install -e .
 
 # `wvutils.aws`
 
-AWS Utilities
+Utilities for interacting with AWS services.
 
-This module contains utilities for interacting with AWS services.
+This module provides utilities for interacting with AWS services.
 
 <a id="wvutils.aws.get_boto3_session"></a>
 
@@ -72,7 +72,11 @@ This module contains utilities for interacting with AWS services.
 def get_boto3_session(region_name: AWSRegion) -> Session
 ```
 
-Get a Boto3 Session (Threadsafe)
+Get the globally shared Boto3 session for a region (thread-safe).
+
+**Todo**:
+
+  * Add support for other session parameters.
 
 **Arguments**:
 
@@ -80,28 +84,36 @@ Get a Boto3 Session (Threadsafe)
 
 **Returns**:
 
-- `Session` - Boto3 session.
+- _Session_ - Boto3 session.
 
-<a id="wvutils.aws.reset_boto3_sessions"></a>
+<a id="wvutils.aws.clear_boto3_sessions"></a>
 
-#### `reset_boto3_sessions`
+#### `clear_boto3_sessions`
 
 ```python
-def reset_boto3_sessions()
+def clear_boto3_sessions()
 ```
 
-Reset the global boto3 sessions
+Clear all globally shared Boto3 sessions (thread-safe).
 
-<a id="wvutils.aws.boto3_resource"></a>
+**Returns**:
 
-#### `boto3_resource`
+- _bool_ - Whether any sessions were cleared.
+
+<a id="wvutils.aws.boto3_client"></a>
+
+#### `boto3_client`
 
 ```python
 @contextmanager
-def boto3_resource(service_name: str, region_name: AWSRegion)
+def boto3_client(service_name: str, region_name: AWSRegion)
 ```
 
-Create a Boto3 Client for a AWS Resource (Threadsafe)
+Context manager for a Boto3 client (thread-safe).
+
+**Todo**:
+
+  * Add support for other session parameters.
 
 **Arguments**:
 
@@ -110,7 +122,7 @@ Create a Boto3 Client for a AWS Resource (Threadsafe)
 
 **Yields**:
 
-- `Any` - Boto3 resource.
+- _Any_ - Boto3 client.
 
 **Raises**:
 
@@ -124,7 +136,7 @@ Create a Boto3 Client for a AWS Resource (Threadsafe)
 def parse_s3_uri(s3_uri: str) -> tuple[str, str]
 ```
 
-Parse the Bucket Name and Path from an S3 URI
+Parse the bucket name and path from a S3 URI.
 
 **Arguments**:
 
@@ -132,7 +144,7 @@ Parse the Bucket Name and Path from an S3 URI
 
 **Returns**:
 
-- `tuple[str, str]` - Bucket name and path.
+- _tuple[str, str]_ - Bucket name and path.
 
 <a id="wvutils.aws.download_from_s3"></a>
 
@@ -146,7 +158,7 @@ def download_from_s3(file_path: FilePath,
                      overwrite: bool = True) -> None
 ```
 
-Download a File from S3
+Download a file from S3.
 
 **Arguments**:
 
@@ -169,7 +181,7 @@ def upload_file_to_s3(file_path: FilePath, bucket_name: str, bucket_path: str,
                       region_name: AWSRegion) -> None
 ```
 
-Upload a File to S3
+Upload a file to S3.
 
 **Arguments**:
 
@@ -191,7 +203,7 @@ def upload_bytes_to_s3(raw_b: bytes, bucket_name: str, bucket_path: str,
                        region_name: AWSRegion) -> None
 ```
 
-Write Bytes to a File in S3
+Write bytes to a file in S3.
 
 **Arguments**:
 
@@ -210,7 +222,7 @@ def secrets_fetch(
         region_name: AWSRegion) -> str | int | float | list | dict | None
 ```
 
-Request a Secret String from Secrets
+Request a secret string from Secrets.
 
 **Arguments**:
 
@@ -219,7 +231,7 @@ Request a Secret String from Secrets
 
 **Returns**:
 
-- `str | int | float | list | dict | None` - Secret string.
+- _str | int | float | list | dict | None_ - Secret string.
 
 <a id="wvutils.aws.athena_execute_query"></a>
 
@@ -230,7 +242,7 @@ def athena_execute_query(query: str, database_name: str,
                          region_name: AWSRegion) -> str | None
 ```
 
-Execute a Query in Athena
+Execute a query in Athena.
 
 **Arguments**:
 
@@ -240,7 +252,7 @@ Execute a Query in Athena
 
 **Returns**:
 
-- `str | None` - Query execution ID of the query.
+- _str | None_ - Query execution ID of the query.
 
 <a id="wvutils.aws.athena_retrieve_queries"></a>
 
@@ -251,7 +263,7 @@ def athena_retrieve_queries(qeid: str, database_name: str,
                             region_name: AWSRegion) -> str | None
 ```
 
-Retrieve the S3 URI for Results from a Athena Query
+Retrieve the S3 URI for results of a query in Athena.
 
 **Arguments**:
 
@@ -261,7 +273,7 @@ Retrieve the S3 URI for Results from a Athena Query
 
 **Returns**:
 
-- `str | None` - Current status of the query, or S3 URI of the results.
+- _str | None_ - Current status of the query, or S3 URI of the results.
 
 <a id="wvutils.aws.athena_stop_query"></a>
 
@@ -271,7 +283,7 @@ Retrieve the S3 URI for Results from a Athena Query
 def athena_stop_query(qeid: str, region_name: AWSRegion) -> None
 ```
 
-Stop the Execution of a Query in Athena
+Stop the execution of a query in Athena.
 
 **Arguments**:
 
@@ -294,7 +306,7 @@ This module provides utilities for working with paths.
 def is_pathlike(potential_path: Any) -> bool
 ```
 
-Check if an Object is Path-Like
+Check if an object is path-like.
 
 **Arguments**:
 
@@ -302,7 +314,7 @@ Check if an Object is Path-Like
 
 **Returns**:
 
-- `bool` - True if the object is path-like, otherwise False.
+- _bool_ - True if the object is path-like, otherwise False.
 
 <a id="wvutils.path.stringify_path"></a>
 
@@ -312,7 +324,7 @@ Check if an Object is Path-Like
 def stringify_path(file_path: FilePath) -> str
 ```
 
-Resolve a Path-Like Object to a String
+Stringify a path-like object.
 
 **Arguments**:
 
@@ -320,7 +332,7 @@ Resolve a Path-Like Object to a String
 
 **Returns**:
 
-- `str` - Path-like object as a string.
+- _str_ - Path-like object as a string.
 
 <a id="wvutils.path.ensure_abspath"></a>
 
@@ -330,7 +342,7 @@ Resolve a Path-Like Object to a String
 def ensure_abspath(file_path: str) -> str
 ```
 
-Make a Path Absolute if it is Not Already
+Make a path absolute if it is not already.
 
 **Arguments**:
 
@@ -338,7 +350,7 @@ Make a Path Absolute if it is Not Already
 
 **Returns**:
 
-- `str` - Absolute path.
+- _str_ - Absolute path.
 
 <a id="wvutils.path.resolve_path"></a>
 
@@ -348,7 +360,7 @@ Make a Path Absolute if it is Not Already
 def resolve_path(file_path: FilePath) -> str
 ```
 
-Resolve a Path-Like Object to an Absolute Path that is a String
+Stringify and resolve a path-like object.
 
 **Arguments**:
 
@@ -356,7 +368,7 @@ Resolve a Path-Like Object to an Absolute Path that is a String
 
 **Returns**:
 
-- `str` - Absolute path of the path-like object as a string.
+- _str_ - Absolute path of the path-like object as a string.
 
 <a id="wvutils.path.xdg_cache_path"></a>
 
@@ -366,20 +378,20 @@ Resolve a Path-Like Object to an Absolute Path that is a String
 def xdg_cache_path() -> str
 ```
 
-Base Directory to Store User-Specific Non-Essential Data Files
+Base directory to store user-specific non-essential data files.
 
 This should be '${HOME}/.cache', but the 'HOME' environment variable may not exist on non-POSIX-compliant systems.
 On POSIX-compliant systems, the XDG base directory specification is followed exactly since '~' expands to '$HOME' if it is present.
 
 **Returns**:
 
-- `str` - Path for XDG cache.
+- _str_ - Path for XDG cache.
 
 <a id="wvutils.proxies"></a>
 
 # `wvutils.proxies`
 
-Proxy Utilities
+Utilities for working with proxies.
 
 This module provides utilities for working with proxies.
 
@@ -391,11 +403,9 @@ This module provides utilities for working with proxies.
 class ProxyManager()
 ```
 
-Proxy Manager
+Manages a list of proxies.
 
-This class manages a list of proxies and provides a simple interface for
-retrieving them. It also provides the ability to re-order the list of
-proxies, and to re-use proxies.
+This class manages a list of proxies, allowing for randomization, re-use, etc.
 
 <a id="wvutils.proxies.ProxyManager.add_proxies"></a>
 
@@ -405,11 +415,11 @@ proxies, and to re-use proxies.
 def add_proxies(proxies: list[str], include_duplicates: bool = False) -> None
 ```
 
-Add New Proxy Addresses
+Add additional proxy addresses.
 
 **Arguments**:
 
-- `proxies` _list[str]_ - List of proxies to add.
+- `proxies` _list[str]_ - List of proxy addresses.
 
 <a id="wvutils.proxies.ProxyManager.set_proxies"></a>
 
@@ -419,11 +429,13 @@ Add New Proxy Addresses
 def set_proxies(proxies: list[str]) -> None
 ```
 
-Replace All Proxy Addresses
+Set the proxy addresses.
+
+Note: This will clear all existing proxies.
 
 **Arguments**:
 
-- `proxies` _list[str]_ - List of proxies
+- `proxies` _list[str]_ - List of proxy addresses.
 
 <a id="wvutils.proxies.ProxyManager.can_cycle"></a>
 
@@ -434,11 +446,11 @@ Replace All Proxy Addresses
 def can_cycle() -> bool
 ```
 
-Whether the Proxy Manager Can Cycle to the Next Proxy
+Check if can cycle to the next proxy address.
 
 **Returns**:
 
-- `bool` - True if can cycle to next proxy, False otherwise.
+- _bool_ - True if can cycle, False otherwise.
 
 <a id="wvutils.proxies.ProxyManager.cycle"></a>
 
@@ -448,7 +460,7 @@ Whether the Proxy Manager Can Cycle to the Next Proxy
 def cycle() -> None
 ```
 
-User Method to Attempt to Increment the Index of the Current Proxy
+Attempt to cycle to the next proxy address.
 
 <a id="wvutils.proxies.ProxyManager.proxy"></a>
 
@@ -459,11 +471,11 @@ User Method to Attempt to Increment the Index of the Current Proxy
 def proxy() -> str | None
 ```
 
-Current Proxy
+Current proxy address.
 
 **Returns**:
 
-- `str | None` - Current proxy or None if no proxies.
+- _str | None_ - Current proxy, or None if no proxies.
 
 <a id="wvutils.proxies.https_to_http"></a>
 
@@ -473,15 +485,15 @@ Current Proxy
 def https_to_http(address: str) -> str
 ```
 
-Convert an HTTPS Proxy Address to HTTP
+Convert a HTTPS proxy address to HTTP.
 
 **Arguments**:
 
-- `address` _str_ - HTTPS proxy address
+- `address` _str_ - HTTPS proxy address.
 
 **Returns**:
 
-- `str` - HTTP proxy address
+- _str_ - HTTP proxy address.
 
 <a id="wvutils.proxies.prepare_http_proxy_for_requests"></a>
 
@@ -491,29 +503,97 @@ Convert an HTTPS Proxy Address to HTTP
 def prepare_http_proxy_for_requests(address: str) -> dict[str, str]
 ```
 
-Prepare a HTTP(S) Proxy Address for use with Requests
+Prepare a HTTP(S) proxy address for use with the 'requests' library.
 
 **Arguments**:
 
-- `address` _str_ - HTTP(S) Proxy address
+- `address` _str_ - HTTP(S) proxy address.
 
 **Returns**:
 
-- `dict[str, str]` - Dictionary of proxy addresses
+- _dict[str, str]_ - Dictionary of HTTP and HTTPS proxy addresses.
 
 **Raises**:
 
-- `ValueError` - If the address is not a valid HTTP(S) proxy address.
+- `ValueError` - If the address does not start with 'http(s)://'.
 
-<a id="wvutils.utils"></a>
+<a id="wvutils.args"></a>
 
-# `wvutils.utils`
+# `wvutils.args`
 
-Common Utilities
+Utilities for parsing arguments from the command line.
 
-This module contains common utilities used throughout packages.
+This module provides utilities for parsing arguments from the command line.
 
-<a id="wvutils.utils.count_lines_in_file"></a>
+<a id="wvutils.args.nonempty_string"></a>
+
+#### `nonempty_string`
+
+```python
+def nonempty_string(name: str) -> Callable
+```
+
+Ensure a string is non-empty.
+
+Example Usage:
+
+```python
+subparser.add_argument(
+    "hashtag",
+    type=nonempty_string("hashtag"),
+    help="A hashtag (without #)",
+)
+```
+
+**Arguments**:
+
+- `name` _str_ - Name of the function, used for debugging.
+
+**Returns**:
+
+- _Callable_ - The decorated function.
+
+<a id="wvutils.args.safechars_string"></a>
+
+#### `safechars_string`
+
+```python
+def safechars_string(
+    name: str,
+    allowed_chars: str | set[str] | tuple[str] | list[str] | None = None
+) -> Callable
+```
+
+Ensure a string contains only safe characters.
+
+Example Usage:
+
+```python
+subparser.add_argument(
+    "--session-key",
+    type=safechars_string,
+    help="Key to share a single token across processes",
+)
+```
+
+**Arguments**:
+
+- `name` _str_ - Name of the function, used for debugging.
+- `allowed_chars` _str | set[str] | tuple[str] | list[str] | None, optional_ - Custom characters used to validate the function name. Defaults to None.
+
+**Returns**:
+
+- _Callable_ - The decorated function.
+
+<a id="wvutils.general"></a>
+
+# `wvutils.general`
+
+General utilities for working with Python.
+
+This module provides general utilities for working with Python.
+
+<a id="wvutils.general.count_lines_in_file"></a>
 
 #### `count_lines_in_file`
 
@@ -532,9 +612,9 @@ number of lines = # of newlines + 1
 
 **Returns**:
 
-- `int` - Total number of lines in the file.
+- _int_ - Total number of lines in the file.
 
-<a id="wvutils.utils.sys_set_recursion_limit"></a>
+<a id="wvutils.general.sys_set_recursion_limit"></a>
 
 #### `sys_set_recursion_limit`
 
@@ -544,7 +624,7 @@ def sys_set_recursion_limit() -> None
 
 Raise Recursion Limit to Allow for More Recurse
 
-<a id="wvutils.utils.gc_set_threshold"></a>
+<a id="wvutils.general.gc_set_threshold"></a>
 
 #### `gc_set_threshold`
 
@@ -558,7 +638,7 @@ Reduce Number of GC Runs to Improve Performance
 
   Only applies to CPython.
 
-<a id="wvutils.utils.chunker"></a>
+<a id="wvutils.general.chunker"></a>
 
 #### `chunker`
 
@@ -576,9 +656,9 @@ Iterate a Sequence in Chunks
 
 **Yields**:
 
-- `Sequence[Any]` - Chunk of values with length <= n.
+- _Sequence[Any]_ - Chunk of values with length <= n.
 
-<a id="wvutils.utils.is_iterable"></a>
+<a id="wvutils.general.is_iterable"></a>
 
 #### `is_iterable`
 
@@ -594,9 +674,9 @@ Check if an Object is Iterable
 
 **Returns**:
 
-- `bool` - Whether the object is iterable.
+- _bool_ - Whether the object is iterable.
 
-<a id="wvutils.utils.rename_key"></a>
+<a id="wvutils.general.rename_key"></a>
 
 #### `rename_key`
 
@@ -618,9 +698,9 @@ Rename a Dictionary Key
 
 **Returns**:
 
-- `dict | None` - Copy of the dictionary if in_place is False, otherwise None.
+- _dict | None_ - Copy of the dictionary if in_place is False, otherwise None.
 
-<a id="wvutils.utils.unnest_key"></a>
+<a id="wvutils.general.unnest_key"></a>
 
 #### `unnest_key`
 
@@ -637,106 +717,40 @@ Fetch a Value from a Deeply Nested Dictionary
 
 **Returns**:
 
-- `Any` - The result of the provided keys.
-
-<a id="wvutils.args"></a>
-
-# `wvutils.args`
-
-Argument Parsing Utilities
-
-This module contains utilities for parsing arguments from the command line.
-
-<a id="wvutils.args.nonempty_string"></a>
-
-#### `nonempty_string`
-
-```python
-def nonempty_string(name: str) -> Callable
-```
-
-Ensure a String is Non-Empty
-
-Example Usage:
-
-```python
-subparser.add_argument(
-    "hashtag",
-    type=nonempty_string("hashtag"),
-    help="A hashtag (without #)",
-)
-```
-
-**Arguments**:
-
-- `name` _str_ - Name of the function, used for debugging.
-
-**Returns**:
-
-- `Callable` - The decorated function.
-
-<a id="wvutils.args.safechars_string"></a>
-
-#### `safechars_string`
-
-```python
-def safechars_string(
-    name: str,
-    allowed_chars: str | set[str] | tuple[str] | list[str] | None = None
-) -> Callable
-```
-
-Ensure a String Contains Only Safe Characters
-
-Example Usage:
-
-```python
-subparser.add_argument(
-    "--session-key",
-    type=safechars_string,
-    help="Key to share a single token across processes",
-)
-```
-
-**Arguments**:
-
-- `name` _str_ - Name of the function, used for debugging.
-- `allowed_chars` _str | set[str] | tuple[str] | list[str] | None, optional_ - Custom characters used to validate the function name. Defaults to None.
-
-**Returns**:
-
-- `Callable` - The decorated function.
+- _Any_ - The result of the provided keys.
 
 <a id="wvutils.restruct"></a>
 
 # `wvutils.restruct`
 
-Restructure Data
+Utilities for restructuring data.
 
-This module contains functions for restructuring data.
+This module provides utilities for restructuring data, including serialization and hashing.
 
 JSON
 
-| Python                                     | JSON        |
-| :----------------------------------------- | :---------- |
-| dict                                       | object      |
-| list, tuple                                | array       |
-| str                                        | string      |
-| int, float, int- & float-derived enums     | number      |
-| True                                       | true        |
-| False                                      | false       |
-| None                                       | null        |
+| Python                                 | JSON   |
+| :------------------------------------- | :----- |
+| dict                                   | object |
+| list, tuple                            | array  |
+| str                                    | string |
+| int, float, int- & float-derived enums | number |
+| True                                   | true   |
+| False                                  | false  |
+| None                                   | null   |
 
 Hash
 
--   No content
+> No content.
 
 Pickle
 
--   An important difference between cloudpickle and pickle is that cloudpickle can serialize a function or class by value, whereas pickle can only serialize it by reference.
-Serialization by reference treats functions and classes as attributes of modules, and pickles them through instructions that trigger the import of their module at load time.
-Serialization by reference is thus limited in that it assumes that the module containing the function or class is available/importable in the unpickling environment.
-This assumption breaks when pickling constructs defined in an interactive session, a case that is automatically detected by cloudpickle, that pickles such constructs by value.
+> An important difference between cloudpickle and pickle is that cloudpickle can serialize a function or class by value, whereas pickle can only serialize it by reference.
+> Serialization by reference treats functions and classes as attributes of modules, and pickles them through instructions that trigger the import of their module at load time.
+> Serialization by reference is thus limited in that it assumes that the module containing the function or class is available/importable in the unpickling environment.
+> This assumption breaks when pickling constructs defined in an interactive session, a case that is automatically detected by cloudpickle, that pickles such constructs by value.
+
+Read more: https://github.com/cloudpipe/cloudpickle/blob/master/README.md#overriding-pickles-serialization-mechanism-for-importable-constructs
 
 <a id="wvutils.restruct.json_dumps"></a>
 
@@ -746,7 +760,7 @@ This assumption breaks when pickling constructs defined in an interactive sessio
 def json_dumps(obj: JSONEncodable) -> str
 ```
 
-Encode an Object as JSON
+Encode an object as JSON.
 
 **Arguments**:
 
@@ -754,7 +768,7 @@ Encode an Object as JSON
 
 **Returns**:
 
-- `str` - Object encoded as JSON.
+- _str_ - Object encoded as JSON.
 
 **Raises**:
 
@@ -768,7 +782,7 @@ Encode an Object as JSON
 def jsonl_dumps(objs: Iterable[JSONEncodable]) -> str
 ```
 
-Encode Objects as JSONL
+Encode objects as JSONL.
 
 **Arguments**:
 
@@ -776,7 +790,7 @@ Encode Objects as JSONL
 
 **Returns**:
 
-- `str` - Objects encoded as JSONL.
+- _str_ - Objects encoded as JSONL.
 
 **Raises**:
 
@@ -790,7 +804,7 @@ Encode Objects as JSONL
 def json_dump(file_path: str, obj: JSONEncodable) -> None
 ```
 
-Encode an Object as JSON and Write it to a File
+Encode an object as JSON and write it to a file.
 
 **Arguments**:
 
@@ -809,7 +823,7 @@ Encode an Object as JSON and Write it to a File
 def jsonl_dump(file_path: str, objs: Iterable[JSONEncodable]) -> None
 ```
 
-Encode Objects as JSONL and Write them to a File
+Encode objects as JSONL and write them to a file.
 
 **Arguments**:
 
@@ -828,7 +842,7 @@ Encode Objects as JSONL and Write them to a File
 def json_loads(encoded_obj: str) -> JSONEncodable
 ```
 
-Decode a JSON-Encoded Object
+Decode a JSON-encoded object.
 
 **Arguments**:
 
@@ -836,7 +850,7 @@ Decode a JSON-Encoded Object
 
 **Returns**:
 
-- `JSONEncodable` - Decoded object.
+- _JSONEncodable_ - Decoded object.
 
 **Raises**:
 
@@ -850,7 +864,7 @@ Decode a JSON-Encoded Object
 def json_load(file_path: FilePath) -> JSONEncodable
 ```
 
-Decode a File Containing a JSON-Encoded Object
+Decode a file containing a JSON-encoded object.
 
 **Arguments**:
 
@@ -858,7 +872,7 @@ Decode a File Containing a JSON-Encoded Object
 
 **Returns**:
 
-- `JSONEncodable` - Decoded object.
+- _JSONEncodable_ - Decoded object.
 
 **Raises**:
 
@@ -876,7 +890,7 @@ def jsonl_loader(
 ) -> Generator[JSONEncodable, None, None]
 ```
 
-Decode a File Containing JSON-Encoded Objects in JSONL
+Decode a file containing JSON-encoded objects, one per line.
 
 **Arguments**:
 
@@ -885,7 +899,7 @@ Decode a File Containing JSON-Encoded Objects in JSONL
 
 **Yields**:
 
-- `JSONEncodable` - Decoded object.
+- _JSONEncodable_ - Decoded object.
 
 **Raises**:
 
@@ -900,7 +914,7 @@ def squeegee_loader(
         file_path: FilePath) -> Generator[JSONEncodable, None, None]
 ```
 
-Automatically Decode a File Containing JSON-Encoded Objects
+Automatically decode a file containing JSON-encoded objects.
 
 Supports multiple formats (JSON, JSONL, JSONL of JSONL, etc).
 
@@ -910,7 +924,7 @@ Supports multiple formats (JSON, JSONL, JSONL of JSONL, etc).
 
 **Yields**:
 
-- `JSONEncodable` - Decoded object.
+- _JSONEncodable_ - Decoded object.
 
 **Raises**:
 
@@ -924,7 +938,9 @@ Supports multiple formats (JSON, JSONL, JSONL of JSONL, etc).
 def gen_hash(obj: MD5Hashable) -> str | None
 ```
 
-Create an MD5 Hash from an JSONEncodable Object
+Create an MD5 hash from a hashable object.
+
+Note: Tuples and sets are not hashable, so they are converted to lists.
 
 **Arguments**:
 
@@ -932,7 +948,7 @@ Create an MD5 Hash from an JSONEncodable Object
 
 **Returns**:
 
-- `str | None` - MD5 hash of the object, or None if object was an empty iterable.
+- _str | None_ - MD5 hash of the object, or None if object was an empty iterable.
 
 **Raises**:
 
@@ -946,7 +962,7 @@ Create an MD5 Hash from an JSONEncodable Object
 def pickle_dump(file_path: FilePath, obj: PickleSerializable) -> None
 ```
 
-Serialize an Object as a Pickle and Write it to a File
+Serialize an object as a pickle and write it to a file.
 
 **Arguments**:
 
@@ -965,7 +981,7 @@ Serialize an Object as a Pickle and Write it to a File
 def pickle_dumps(obj: PickleSerializable) -> bytes
 ```
 
-Serialize an Object as a Pickle
+Serialize an object as a pickle.
 
 **Arguments**:
 
@@ -973,7 +989,7 @@ Serialize an Object as a Pickle
 
 **Returns**:
 
-- `bytes` - Serialized object.
+- _bytes_ - Serialized object.
 
 **Raises**:
 
@@ -987,9 +1003,9 @@ Serialize an Object as a Pickle
 def pickle_load(file_path: FilePath) -> PickleSerializable
 ```
 
-Deserialize Pickle-Serialized Object from a File
+Deserialize a pickle-serialized object from a file.
 
-NOTE: Not safe for large files.
+Note: Not safe for large files.
 
 **Arguments**:
 
@@ -997,7 +1013,7 @@ NOTE: Not safe for large files.
 
 **Returns**:
 
-- `PickleSerializable` - Deserialized object.
+- _PickleSerializable_ - Deserialized object.
 
 **Raises**:
 
@@ -1011,7 +1027,7 @@ NOTE: Not safe for large files.
 def pickle_loads(serialized_obj: bytes) -> PickleSerializable
 ```
 
-Deserialize Pickle-Serialized Object
+Deserialize a pickle-serialized object.
 
 **Arguments**:
 
@@ -1019,7 +1035,7 @@ Deserialize Pickle-Serialized Object
 
 **Returns**:
 
-- `PickleSerializable` - Deserialized object.
+- _PickleSerializable_ - Deserialized object.
 
 **Raises**:
 

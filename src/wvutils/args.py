@@ -1,6 +1,6 @@
-"""Argument Parsing Utilities
+"""Utilities for parsing arguments from the command line.
 
-This module contains utilities for parsing arguments from the command line.
+This module provides utilities for parsing arguments from the command line.
 """
 
 import logging
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def nonempty_string(name: str) -> Callable:
-    """Ensure a String is Non-Empty
+    """Ensure a string is non-empty.
 
     Example Usage:
 
@@ -50,7 +50,7 @@ def safechars_string(
     name: str,
     allowed_chars: str | set[str] | tuple[str] | list[str] | None = None,
 ) -> Callable:
-    """Ensure a String Contains Only Safe Characters
+    """Ensure a string contains only safe characters.
 
     Example Usage:
 

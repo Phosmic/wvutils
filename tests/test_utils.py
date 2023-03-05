@@ -3,7 +3,7 @@ import sys
 import tempfile
 import unittest
 
-from wvutils.utils import (
+from wvutils.general import (
     chunker,
     count_lines_in_file,
     gc_set_threshold,

@@ -10,11 +10,11 @@ from botocore.exceptions import ClientError
 from moto import mock_s3, mock_secretsmanager
 
 from wvutils.aws import (
-    boto3_resource,
+    boto3_client,
     download_from_s3,
     get_boto3_session,
     parse_s3_uri,
-    reset_boto3_sessions,
+    clear_boto3_sessions,
     secrets_fetch,
     upload_bytes_to_s3,
     upload_file_to_s3,
@@ -45,7 +45,7 @@ class TestAWSSessions(unittest.TestCase):
 
     def tearDown(self):
         # Reset the global boto3 sessions
-        reset_boto3_sessions()
+        clear_boto3_sessions()
 
     def test_get_boto3_session(self):
         session1 = get_boto3_session(self.region_name1)
@@ -55,10 +55,10 @@ class TestAWSSessions(unittest.TestCase):
         self.assertIs(session1, session2)
         self.assertIsNot(session1, session3)
 
-    def test_reset_boto3_sessions(self):
+    def test_clear_boto3_sessions(self):
         session1 = get_boto3_session(self.region_name1)
         session2 = get_boto3_session(self.region_name2)
-        reset_boto3_sessions()
+        clear_boto3_sessions()
         session3 = get_boto3_session(self.region_name1)
         session4 = get_boto3_session(self.region_name2)
 
@@ -73,11 +73,11 @@ class TestAWSContextHelper(unittest.TestCase):
         self.boto3_session_mock = MagicMock()
         self.boto3_client_mock = MagicMock()
         self.boto3_session_mock.client.return_value = self.boto3_client_mock
-        self.context_manager = boto3_resource(self.service_name, self.region_name)
+        self.context_manager = boto3_client(self.service_name, self.region_name)
 
     def tearDown(self):
         # Reset the global boto3 sessions
-        reset_boto3_sessions()
+        clear_boto3_sessions()
 
     def test_boto3_resource(self):
         with patch("wvutils.aws.Session", return_value=self.boto3_session_mock):
@@ -132,7 +132,7 @@ class TestDownloadFromS3(unittest.TestCase):
 
     def tearDown(self):
         # Reset the global boto3 sessions
-        reset_boto3_sessions()
+        clear_boto3_sessions()
 
         # Remove the file if it exists
         if os.path.exists(self.file_path):
@@ -205,7 +205,7 @@ class TestUploadFileToS3(unittest.TestCase):
 
     def tearDown(self):
         # Reset the global boto3 sessions
-        reset_boto3_sessions()
+        clear_boto3_sessions()
 
     def test_upload_file_to_s3(self):
         with tempfile.NamedTemporaryFile() as twf:
@@ -252,7 +252,7 @@ class TestUploadBytesToS3(unittest.TestCase):
 
     def tearDown(self):
         # Reset the global boto3 sessions
-        reset_boto3_sessions()
+        clear_boto3_sessions()
 
     def test_upload_bytes_to_s3(self):
         # Upload the bytes to S3
@@ -289,7 +289,7 @@ class TestSecretsFetch(unittest.TestCase):
 
     def tearDown(self) -> None:
         # Reset the global boto3 sessions
-        reset_boto3_sessions()
+        clear_boto3_sessions()
 
     def test_secrets_fetch(self):
         self.assertEqual(

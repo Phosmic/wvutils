@@ -1,6 +1,6 @@
-"""Common Utilities
+"""General utilities for working with Python.
 
-This module contains common utilities used throughout packages.
+This module provides general utilities for working with Python.
 """
 
 import copy
