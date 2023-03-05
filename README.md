@@ -77,7 +77,6 @@ Get a Boto3 Session (Threadsafe)
 **Arguments**:
 
 - `region_name` _AWSRegion_ - Region name for the session.
-  
 
 **Returns**:
 
@@ -108,12 +107,10 @@ Create a Boto3 Client for a AWS Resource (Threadsafe)
 
 - `service_name` _str_ - Name of the service.
 - `region_name` _AWSRegion_ - Region name for the service.
-  
 
 **Yields**:
 
 - `Any` - Boto3 resource.
-  
 
 **Raises**:
 
@@ -132,7 +129,6 @@ Parse the Bucket Name and Path from an S3 URI
 **Arguments**:
 
 - `s3_uri` _str_ - S3 URI to parse.
-  
 
 **Returns**:
 
@@ -159,7 +155,6 @@ Download a File from S3
 - `bucket_path` _str_ - Path of the S3 bucket containing the file.
 - `region_name` _AWSRegion_ - Region name for S3.
 - `overwrite` _bool_ - Overwrite file on disk if already exists. Defaults to True.
-  
 
 **Raises**:
 
@@ -182,7 +177,6 @@ Upload a File to S3
 - `bucket_name` _str_ - Name of the S3 bucket to upload the file to.
 - `bucket_path` _str_ - Path in the S3 bucket to upload the file to.
 - `region_name` _AWSRegion_ - Region name for S3.
-  
 
 **Raises**:
 
@@ -222,7 +216,6 @@ Request a Secret String from Secrets
 
 - `secret_name` _str_ - Secret name to use.
 - `region_name` _AWSRegion_ - Region name for Secrets.
-  
 
 **Returns**:
 
@@ -244,7 +237,6 @@ Execute a Query in Athena
 - `query` _str_ - Query to execute.
 - `database_name` _str_ - Name of database to execute the query against.
 - `region_name` _AWSRegion_ - Region name for Athena.
-  
 
 **Returns**:
 
@@ -266,7 +258,6 @@ Retrieve the S3 URI for Results from a Athena Query
 - `qeid` _str_ - Query execution ID of the query to fetch.
 - `database_name` _str_ - Name of the database the query is running against (for debugging).
 - `region_name` _AWSRegion_ - Region name for Athena.
-  
 
 **Returns**:
 
@@ -308,7 +299,6 @@ Check if an Object is Path-Like
 **Arguments**:
 
 - `potential_path` _Any_ - Object to check.
-  
 
 **Returns**:
 
@@ -327,7 +317,6 @@ Resolve a Path-Like Object to a String
 **Arguments**:
 
 - `file_path` _FilePath_ - Path-like object to stringify.
-  
 
 **Returns**:
 
@@ -346,7 +335,6 @@ Make a Path Absolute if it is Not Already
 **Arguments**:
 
 - `file_path` _str_ - Path to ensure is absolute.
-  
 
 **Returns**:
 
@@ -365,7 +353,6 @@ Resolve a Path-Like Object to an Absolute Path that is a String
 **Arguments**:
 
 - `file_path` _FilePath_ - Path-like object to resolve.
-  
 
 **Returns**:
 
@@ -491,7 +478,6 @@ Convert an HTTPS Proxy Address to HTTP
 **Arguments**:
 
 - `address` _str_ - HTTPS proxy address
-  
 
 **Returns**:
 
@@ -510,12 +496,10 @@ Prepare a HTTP(S) Proxy Address for use with Requests
 **Arguments**:
 
 - `address` _str_ - HTTP(S) Proxy address
-  
 
 **Returns**:
 
 - `dict[str, str]` - Dictionary of proxy addresses
-  
 
 **Raises**:
 
@@ -534,7 +518,7 @@ This module contains common utilities used throughout packages.
 #### `count_lines_in_file`
 
 ```python
-def count_lines_in_file(input_path: FilePath) -> int
+def count_lines_in_file(file_path: FilePath) -> int
 ```
 
 Count the Number of Lines in a File
@@ -544,8 +528,7 @@ number of lines = # of newlines + 1
 
 **Arguments**:
 
-- `input_path` _FilePath_ - Path of the file to count lines in.
-  
+- `file_path` _FilePath_ - Path of the file to count lines in.
 
 **Returns**:
 
@@ -590,7 +573,6 @@ Iterate a Sequence in Chunks
 
 - `seq` _Sequence[Any]_ - Sequence of values.
 - `n` _int_ - Number of values per chunk.
-  
 
 **Yields**:
 
@@ -609,7 +591,6 @@ Check if an Object is Iterable
 **Arguments**:
 
 - `obj` _Any_ - Object to check.
-  
 
 **Returns**:
 
@@ -634,7 +615,6 @@ Rename a Dictionary Key
 - `src` _str_ - Name of the key to rename.
 - `dest` _str_ - Name of the key to change to.
 - `in_place` _bool, optional_ - Perform in-place using the provided reference. Defaults to False.
-  
 
 **Returns**:
 
@@ -654,7 +634,6 @@ Fetch a Value from a Deeply Nested Dictionary
 
 - `obj` _dict_ - Dictionary to recursively iterate.
 - `*keys` _str_ - Ordered keys to fetch.
-  
 
 **Returns**:
 
@@ -679,16 +658,18 @@ def nonempty_string(name: str) -> Callable
 Ensure a String is Non-Empty
 
 Example Usage:
+
 ```python
-@classmethod
-def _cli_setup_parser(cls, subparser):
-subparser.add_argument("hashtag", type=nonempty_string("hashtag"), help="A hashtag (without #)")
+subparser.add_argument(
+    "hashtag",
+    type=nonempty_string("hashtag"),
+    help="A hashtag (without #)",
+)
 ```
 
 **Arguments**:
 
 - `name` _str_ - Name of the function, used for debugging.
-  
 
 **Returns**:
 
@@ -710,16 +691,17 @@ Ensure a String Contains Only Safe Characters
 Example Usage:
 
 ```python
-@classmethod
-def _cli_setup_parser(cls, subparser):
-    subparser.add_argument("--session-key", type=safechars_string, help="Key to share a single token across processes")
+subparser.add_argument(
+    "--session-key",
+    type=safechars_string,
+    help="Key to share a single token across processes",
+)
 ```
 
 **Arguments**:
 
 - `name` _str_ - Name of the function, used for debugging.
 - `allowed_chars` _str | set[str] | tuple[str] | list[str] | None, optional_ - Custom characters used to validate the function name. Defaults to None.
-  
 
 **Returns**:
 
@@ -761,7 +743,7 @@ This assumption breaks when pickling constructs defined in an interactive sessio
 #### `json_dumps`
 
 ```python
-def json_dumps(obj: JSONEncodable) -> JSONEncoded
+def json_dumps(obj: JSONEncodable) -> str
 ```
 
 Encode an Object as JSON
@@ -769,12 +751,10 @@ Encode an Object as JSON
 **Arguments**:
 
 - `obj` _JSONEncodable_ - Object to encode.
-  
 
 **Returns**:
 
-- `JSONEncoded` - Object encoded as JSON.
-  
+- `str` - Object encoded as JSON.
 
 **Raises**:
 
@@ -785,7 +765,7 @@ Encode an Object as JSON
 #### `jsonl_dumps`
 
 ```python
-def jsonl_dumps(objs: Iterable[JSONEncodable]) -> JSONEncoded
+def jsonl_dumps(objs: Iterable[JSONEncodable]) -> str
 ```
 
 Encode Objects as JSONL
@@ -793,12 +773,10 @@ Encode Objects as JSONL
 **Arguments**:
 
 - `objs` _Iterable[JSONEncodable]_ - Objects to encode.
-  
 
 **Returns**:
 
-- `JSONEncoded` - Objects encoded as JSONL.
-  
+- `str` - Objects encoded as JSONL.
 
 **Raises**:
 
@@ -818,7 +796,6 @@ Encode an Object as JSON and Write it to a File
 
 - `file_path` _str_ - Path of the file to open.
 - `obj` _JSONEncodable_ - Object to encode.
-  
 
 **Raises**:
 
@@ -838,7 +815,6 @@ Encode Objects as JSONL and Write them to a File
 
 - `file_path` _str_ - Path of the file to open.
 - `objs` _Iterable[JSONEncodable]_ - Objects to encode.
-  
 
 **Raises**:
 
@@ -849,20 +825,18 @@ Encode Objects as JSONL and Write them to a File
 #### `json_loads`
 
 ```python
-def json_loads(encoded_obj: JSONEncoded) -> JSONEncodable
+def json_loads(encoded_obj: str) -> JSONEncodable
 ```
 
 Decode a JSON-Encoded Object
 
 **Arguments**:
 
-- `encoded_obj` _JSONEncoded_ - Object to decode.
-  
+- `encoded_obj` _str_ - Object to decode.
 
 **Returns**:
 
 - `JSONEncodable` - Decoded object.
-  
 
 **Raises**:
 
@@ -881,12 +855,10 @@ Decode a File Containing a JSON-Encoded Object
 **Arguments**:
 
 - `file_path` _FilePath_ - Path of the file to open.
-  
 
 **Returns**:
 
 - `JSONEncodable` - Decoded object.
-  
 
 **Raises**:
 
@@ -899,6 +871,7 @@ Decode a File Containing a JSON-Encoded Object
 ```python
 def jsonl_loader(
         file_path: FilePath,
+        *,
         allow_empty_lines: bool = True
 ) -> Generator[JSONEncodable, None, None]
 ```
@@ -909,12 +882,10 @@ Decode a File Containing JSON-Encoded Objects in JSONL
 
 - `file_path` _FilePath_ - Path of the file to open.
 - `allow_empty_lines` _bool, optional_ - Whether to allow empty lines. Defaults to True.
-  
 
 **Yields**:
 
 - `JSONEncodable` - Decoded object.
-  
 
 **Raises**:
 
@@ -936,12 +907,10 @@ Supports multiple formats (JSON, JSONL, JSONL of JSONL, etc).
 **Arguments**:
 
 - `file_path` _FilePath_ - Path of the file to open.
-  
 
 **Yields**:
 
 - `JSONEncodable` - Decoded object.
-  
 
 **Raises**:
 
@@ -952,7 +921,7 @@ Supports multiple formats (JSON, JSONL, JSONL of JSONL, etc).
 #### `gen_hash`
 
 ```python
-def gen_hash(obj: MD5Hashable) -> MD5Hashed | None
+def gen_hash(obj: MD5Hashable) -> str | None
 ```
 
 Create an MD5 Hash from an JSONEncodable Object
@@ -960,12 +929,10 @@ Create an MD5 Hash from an JSONEncodable Object
 **Arguments**:
 
 - `obj` _MD5Hashable_ - Object to hash.
-  
 
 **Returns**:
 
-- `MD5Hashed | None` - MD5 hash of the object or None if object was an empty iterable.
-  
+- `str | None` - MD5 hash of the object, or None if object was an empty iterable.
 
 **Raises**:
 
@@ -985,7 +952,6 @@ Serialize an Object as a Pickle and Write it to a File
 
 - `file_path` _FilePath_ - Path of the file to write.
 - `obj` _JSONEncodable_ - Object to serialize.
-  
 
 **Raises**:
 
@@ -996,7 +962,7 @@ Serialize an Object as a Pickle and Write it to a File
 #### `pickle_dumps`
 
 ```python
-def pickle_dumps(obj: PickleSerializable) -> PickleSerialized
+def pickle_dumps(obj: PickleSerializable) -> bytes
 ```
 
 Serialize an Object as a Pickle
@@ -1004,12 +970,10 @@ Serialize an Object as a Pickle
 **Arguments**:
 
 - `obj` _PickleSerializable_ - Object to serialize.
-  
 
 **Returns**:
 
-- `PickleSerialized` - Serialized object.
-  
+- `bytes` - Serialized object.
 
 **Raises**:
 
@@ -1030,12 +994,10 @@ NOTE: Not safe for large files.
 **Arguments**:
 
 - `file_path` _FilePath_ - Path of the file to open.
-  
 
 **Returns**:
 
 - `PickleSerializable` - Deserialized object.
-  
 
 **Raises**:
 
@@ -1046,20 +1008,18 @@ NOTE: Not safe for large files.
 #### `pickle_loads`
 
 ```python
-def pickle_loads(serialized_obj: PickleSerialized) -> PickleSerializable
+def pickle_loads(serialized_obj: bytes) -> PickleSerializable
 ```
 
 Deserialize Pickle-Serialized Object
 
 **Arguments**:
 
-- `serialized_obj` _PickleSerialized_ - Object to deserialize.
-  
+- `serialized_obj` _bytes_ - Object to deserialize.
 
 **Returns**:
 
 - `PickleSerializable` - Deserialized object.
-  
 
 **Raises**:
 
