@@ -81,6 +81,12 @@ class TestResolvePath(unittest.TestCase):
 
 
 class TestXdgCachePath(unittest.TestCase):
+    def test_xdg_cache_path_default(self):
+        self.assertEqual(
+            xdg_cache_path(),
+            os.path.join(os.path.expanduser("~"), ".cache"),
+        )
+
     def test_xdg_cache_path_environment_variable(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             os.environ["XDG_CACHE_HOME"] = tmpdir
@@ -102,9 +108,3 @@ class TestXdgCachePath(unittest.TestCase):
             os.path.join(os.path.expanduser("~"), ".cache"),
         )
         os.environ.pop("XDG_CACHE_HOME")
-
-    def test_xdg_cache_path_default(self):
-        self.assertEqual(
-            xdg_cache_path(),
-            os.path.join(os.path.expanduser("~"), ".cache"),
-        )
