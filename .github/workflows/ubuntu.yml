@@ -5,10 +5,10 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
-    paths-ignore: ["doc/**"]
+    paths-ignore: ["docs/**"]
 
 env:
-  YOGGER_CI: 1
+  WVUTILS_CI: 1
 
 permissions:
   contents: read
