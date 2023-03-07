@@ -9,13 +9,13 @@ from botocore.exceptions import ClientError
 from moto import mock_s3, mock_secretsmanager
 
 from wvutils.aws import (
-    boto3_client,
+    athena_retrieve_query,
     clear_boto3_sessions,
     download_from_s3,
     get_boto3_session,
     parse_s3_uri,
-    athena_retrieve_query,
     secrets_fetch,
+    shared_boto3_ctx,
     upload_bytes_to_s3,
     upload_file_to_s3,
 )
@@ -23,19 +23,22 @@ from wvutils.aws import (
 
 class TestParseS3Uri(unittest.TestCase):
     def test_parse_s3_uri(self):
-        s3_uri = "s3://my-bucket/my-path"
-        expected_output = ("my-bucket", "my-path")
-        self.assertEqual(parse_s3_uri(s3_uri), expected_output)
+        self.assertTupleEqual(
+            parse_s3_uri("s3://my-bucket/my-path"),
+            ("my-bucket", "my-path"),
+        )
 
     def test_parse_s3_uri_no_path(self):
-        s3_uri = "s3://my-bucket"
-        expected_output = ("my-bucket", "")
-        self.assertEqual(parse_s3_uri(s3_uri), expected_output)
+        self.assertTupleEqual(
+            parse_s3_uri("s3://my-bucket"),
+            ("my-bucket", ""),
+        )
 
     def test_parse_s3_uri_no_scheme(self):
-        s3_uri = "my-bucket/my-path"
-        expected_output = ("my-bucket", "my-path")
-        self.assertEqual(parse_s3_uri(s3_uri), expected_output)
+        self.assertTupleEqual(
+            parse_s3_uri("my-bucket/my-path"),
+            ("my-bucket", "my-path"),
+        )
 
 
 class TestAWSSessions(unittest.TestCase):
@@ -48,20 +51,24 @@ class TestAWSSessions(unittest.TestCase):
         clear_boto3_sessions()
 
     def test_get_boto3_session(self):
+        # Sessions should be cached by region
         session1 = get_boto3_session(self.region_name1)
         session2 = get_boto3_session(self.region_name1)
         session3 = get_boto3_session(self.region_name2)
-
+        # Check that the same session is returned for the same region
         self.assertIs(session1, session2)
+        # Check that a different session is returned for a different region
         self.assertIsNot(session1, session3)
 
     def test_clear_boto3_sessions(self):
+        # These sessions will persist for the duration of this method after clearing the global sessions
         session1 = get_boto3_session(self.region_name1)
         session2 = get_boto3_session(self.region_name2)
         clear_boto3_sessions()
+        # Any new sessions will be different from the previous ones
         session3 = get_boto3_session(self.region_name1)
         session4 = get_boto3_session(self.region_name2)
-
+        # Check that the sessions are different before/after clearing
         self.assertIsNot(session1, session3)
         self.assertIsNot(session2, session4)
 
@@ -73,7 +80,7 @@ class TestAWSContextHelper(unittest.TestCase):
         self.session_mock = Mock()
         self.client_mock = Mock()
         self.session_mock.client.return_value = self.client_mock
-        self.context_manager = boto3_client(self.service_name, self.region_name)
+        self.context_manager = shared_boto3_ctx(self.service_name, self.region_name)
 
     def tearDown(self):
         # Reset the global boto3 sessions
@@ -81,31 +88,31 @@ class TestAWSContextHelper(unittest.TestCase):
 
     def test_boto3_resource(self):
         with patch("wvutils.aws.Session", return_value=self.session_mock):
-            with self.context_manager as boto3_client:
-                self.assertEqual(boto3_client, self.client_mock)
+            with self.context_manager as client:
+                self.assertIs(client, self.client_mock)
 
-    def test_boto3_resource_with_generic_client_error(self):
-        with patch("wvutils.aws.Session", return_value=self.session_mock):
-            self.client_mock.do_something.side_effect = ClientError(
-                {
-                    "Error": {
-                        "Code": "InternalError",
-                        "Message": "Something went wrong",
-                    },
-                    "ResponseMetadata": {
-                        "RequestId": "123",
-                        "HTTPStatusCode": 500,
-                    },
+    def test_boto3_resource_will_raise_client_error(self):
+        self.client_mock.do_something.side_effect = ClientError(
+            {
+                "Error": {
+                    "Code": "InternalError",
+                    "Message": "Something went wrong",
                 },
-                "operation_name",
-            )
+                "ResponseMetadata": {
+                    "RequestId": "123",
+                    "HTTPStatusCode": 500,
+                },
+            },
+            "operation_name",
+        )
+        with patch("wvutils.aws.Session", return_value=self.session_mock):
             with self.assertRaises(ClientError):
                 with self.context_manager as boto3_client:
                     boto3_client.do_something()
 
-    def test_boto3_resource_with_unknown_client_error(self):
+    def test_boto3_resource_will_raise_unknown_error(self):
+        self.client_mock.do_something.side_effect = Exception("Some other error")
         with patch("wvutils.aws.Session", return_value=self.session_mock):
-            self.client_mock.do_something.side_effect = Exception("Some other error")
             with self.assertRaises(Exception):
                 with self.context_manager as boto3_client:
                     boto3_client.do_something()
@@ -298,9 +305,9 @@ class TestSecretsFetch(unittest.TestCase):
 
 class TestAthenaRetrieveQuery(unittest.TestCase):
     def setUp(self):
-        self.query_execution_id = "abc1234d-5efg-67hi-jklm-89n0op12qr34"
-        self.database_name = "myDatabase"
         self.region_name = "us-east-1"
+        self.database_name = "myDatabase"
+        self.query_execution_id = "abc1234d-5efg-67hi-jklm-89n0op12qr34"
         self.s3_output_location = "s3://my-bucket/path/to/my/output"
 
         # Mock session that returns a mock client
@@ -313,73 +320,61 @@ class TestAthenaRetrieveQuery(unittest.TestCase):
         clear_boto3_sessions()
 
     def test_query_state_queued(self):
-        state = "QUEUED"
+        self.client_mock.get_query_execution.return_value = {
+            "QueryExecution": {
+                "QueryExecutionId": self.query_execution_id,
+                "Status": {"State": "QUEUED"},
+            },
+        }
         with patch("wvutils.aws.Session", return_value=self.session_mock):
-            self.client_mock.get_query_execution.return_value = {
-                "QueryExecution": {
-                    "QueryExecutionId": self.query_execution_id,
-                    "Status": {
-                        "State": state,
-                    },
-                },
-            }
             state_or_s3_uri = athena_retrieve_query(
                 self.query_execution_id,
                 self.database_name,
                 self.region_name,
             )
-        self.assertEqual(state_or_s3_uri, state)
+        self.assertEqual(state_or_s3_uri, "QUEUED")
 
     def test_query_state_running(self):
-        state = "RUNNING"
+        self.client_mock.get_query_execution.return_value = {
+            "QueryExecution": {
+                "QueryExecutionId": self.query_execution_id,
+                "Status": {"State": "RUNNING"},
+            },
+        }
         with patch("wvutils.aws.Session", return_value=self.session_mock):
-            self.client_mock.get_query_execution.return_value = {
-                "QueryExecution": {
-                    "QueryExecutionId": self.query_execution_id,
-                    "Status": {
-                        "State": state,
-                    },
-                },
-            }
             state_or_s3_uri = athena_retrieve_query(
                 self.query_execution_id,
                 self.database_name,
                 self.region_name,
             )
-        self.assertEqual(state_or_s3_uri, state)
+        self.assertEqual(state_or_s3_uri, "RUNNING")
 
     def test_query_state_failed(self):
-        state = "FAILED"
+        self.client_mock.get_query_execution.return_value = {
+            "QueryExecution": {
+                "QueryExecutionId": self.query_execution_id,
+                "Status": {"State": "FAILED"},
+            },
+        }
         with patch("wvutils.aws.Session", return_value=self.session_mock):
-            self.client_mock.get_query_execution.return_value = {
-                "QueryExecution": {
-                    "QueryExecutionId": self.query_execution_id,
-                    "Status": {
-                        "State": state,
-                    },
-                },
-            }
             state_or_s3_uri = athena_retrieve_query(
                 self.query_execution_id,
                 self.database_name,
                 self.region_name,
             )
-        self.assertEqual(state_or_s3_uri, state)
+        self.assertEqual(state_or_s3_uri, "FAILED")
 
     def test_query_state_succeeded(self):
-        state = "SUCCEEDED"
-        with patch("wvutils.aws.Session", return_value=self.session_mock):
-            self.client_mock.get_query_execution.return_value = {
-                "QueryExecution": {
-                    "QueryExecutionId": self.query_execution_id,
-                    "Status": {
-                        "State": state,
-                    },
-                    "ResultConfiguration": {
-                        "OutputLocation": self.s3_output_location,
-                    },
+        self.client_mock.get_query_execution.return_value = {
+            "QueryExecution": {
+                "QueryExecutionId": self.query_execution_id,
+                "Status": {"State": "SUCCEEDED"},
+                "ResultConfiguration": {
+                    "OutputLocation": self.s3_output_location,
                 },
-            }
+            },
+        }
+        with patch("wvutils.aws.Session", return_value=self.session_mock):
             state_or_s3_uri = athena_retrieve_query(
                 self.query_execution_id,
                 self.database_name,
@@ -387,17 +382,29 @@ class TestAthenaRetrieveQuery(unittest.TestCase):
             )
         self.assertEqual(state_or_s3_uri, self.s3_output_location)
 
-    def test_query_state_unexpected(self):
-        state = "SOMETHING ELSE"
+    def test_query_state_unexpected_type(self):
+        self.client_mock.get_query_execution.return_value = {
+            "QueryExecution": {
+                "QueryExecutionId": self.query_execution_id,
+                "Status": {"State": 1},
+            },
+        }
         with patch("wvutils.aws.Session", return_value=self.session_mock):
-            self.client_mock.get_query_execution.return_value = {
-                "QueryExecution": {
-                    "QueryExecutionId": self.query_execution_id,
-                    "Status": {
-                        "State": state,
-                    },
-                },
-            }
+            with self.assertRaises(ValueError):
+                athena_retrieve_query(
+                    self.query_execution_id,
+                    self.database_name,
+                    self.region_name,
+                )
+
+    def test_query_state_unexpected_value(self):
+        self.client_mock.get_query_execution.return_value = {
+            "QueryExecution": {
+                "QueryExecutionId": self.query_execution_id,
+                "Status": {"State": "SOMETHING ELSE"},
+            },
+        }
+        with patch("wvutils.aws.Session", return_value=self.session_mock):
             with self.assertRaises(ValueError):
                 athena_retrieve_query(
                     self.query_execution_id,
@@ -406,13 +413,13 @@ class TestAthenaRetrieveQuery(unittest.TestCase):
                 )
 
     def test_query_state_missing(self):
+        self.client_mock.get_query_execution.return_value = {
+            "QueryExecution": {
+                "QueryExecutionId": self.query_execution_id,
+                "Status": {},
+            },
+        }
         with patch("wvutils.aws.Session", return_value=self.session_mock):
-            self.client_mock.get_query_execution.return_value = {
-                "QueryExecution": {
-                    "QueryExecutionId": self.query_execution_id,
-                    "Status": {},
-                },
-            }
             with self.assertRaises(ValueError):
                 athena_retrieve_query(
                     self.query_execution_id,

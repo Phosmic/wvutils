@@ -11,73 +11,88 @@ from wvutils.path import (
 )
 
 
+class PathLike:
+    def __init__(self, path):
+        self.path = path
+
+    def __fspath__(self):
+        return self.path
+
+
+class NonPathLike:
+    pass
+
+
 class TestIsPathlike(unittest.TestCase):
     def test_string(self):
-        path = "path/to/file"
-        self.assertTrue(is_pathlike(path))
+        self.assertTrue(is_pathlike("path/to/file"))
 
     def test_pathlike_object(self):
-        class PathLike:
-            def __fspath__(self):
-                return "path/to/file"
-
-        path = PathLike()
-        self.assertTrue(is_pathlike(path))
+        self.assertTrue(is_pathlike(PathLike("path/to/file")))
 
     def test_non_pathlike_object(self):
-        class NonPathLike:
-            pass
-
-        obj = NonPathLike()
-        self.assertFalse(is_pathlike(obj))
+        self.assertFalse(is_pathlike(NonPathLike()))
 
 
 class TestStringifyPath(unittest.TestCase):
     def test_string(self):
-        path = "path/to/file"
-        self.assertEqual(stringify_path(path), path)
+        self.assertEqual(
+            stringify_path("path/to/file"),
+            "path/to/file",
+        )
 
     def test_pathlike_object(self):
-        class PathLike:
-            def __fspath__(self):
-                return "path/to/file"
-
-        path = PathLike()
-        self.assertEqual(stringify_path(path), "path/to/file")
+        self.assertEqual(
+            stringify_path(PathLike("path/to/file")),
+            "path/to/file",
+        )
 
     def test_not_pathlike_object(self):
-        class NonPathLike:
-            pass
-
-        obj = NonPathLike()
-        self.assertRaises(TypeError, stringify_path, obj)
+        with self.assertRaises(TypeError):
+            stringify_path(NonPathLike())
 
 
 class TestEnsureAbspath(unittest.TestCase):
+    def test_relative_path(self):
+        self.assertEqual(
+            ensure_abspath("path/to/file"),
+            os.path.abspath("path/to/file"),
+        )
+
     def test_already_absolute(self):
-        path = "/path/to/file"
-        self.assertEqual(ensure_abspath(path), path)
+        self.assertEqual(ensure_abspath("/path/to/file"), "/path/to/file")
 
 
 class TestResolvePath(unittest.TestCase):
-    def test_string(self):
-        path = "path/to/file"
-        self.assertEqual(resolve_path(path), os.path.abspath(path))
+    # TODO: Add tests for home directory resolving.
 
-    def test_pathlike_object(self):
-        class PathLike:
-            def __fspath__(self):
-                return "path/to/file"
+    def test_absolute_string_path(self):
+        self.assertEqual(
+            resolve_path("path/to/file"),
+            os.path.abspath("path/to/file"),
+        )
 
-        path = PathLike()
-        self.assertEqual(resolve_path(path), os.path.abspath("path/to/file"))
+    def test_relative_string_path(self):
+        self.assertEqual(
+            resolve_path("path/to/file"),
+            os.path.abspath("path/to/file"),
+        )
 
-    def test_not_pathlike_object(self):
-        class NonPathLike:
-            pass
+    def test_absolute_pathlike_path(self):
+        self.assertEqual(
+            resolve_path(PathLike("path/to/file")),
+            os.path.abspath("path/to/file"),
+        )
 
-        obj = NonPathLike()
-        self.assertRaises(TypeError, resolve_path, obj)
+    def test_relative_pathlike_path(self):
+        self.assertEqual(
+            resolve_path(PathLike("path/to/file")),
+            os.path.abspath("path/to/file"),
+        )
+
+    def test_nonpathlike(self):
+        with self.assertRaises(TypeError):
+            resolve_path(NonPathLike())
 
 
 class TestXdgCachePath(unittest.TestCase):

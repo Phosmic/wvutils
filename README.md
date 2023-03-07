@@ -100,13 +100,13 @@ Clear all globally shared Boto3 sessions (thread-safe).
 
 - _bool_ - Whether any sessions were cleared.
 
-<a id="wvutils.aws.boto3_client"></a>
+<a id="wvutils.aws.boto3_client_ctx"></a>
 
-#### `boto3_client`
+#### `boto3_client_ctx`
 
 ```python
 @contextmanager
-def boto3_client(service_name: str, region_name: AWSRegion)
+def boto3_client_ctx(service_name: str, region_name: AWSRegion)
 ```
 
 Context manager for a Boto3 client (thread-safe).
@@ -212,6 +212,10 @@ Write bytes to a file in S3.
 - `bucket_path` _str_ - Path in the S3 bucket to upload the file to.
 - `region_name` _AWSRegion_ - Region name for S3.
 
+**Raises**:
+
+- `TypeError` - If `raw_b` is not bytes.
+
 <a id="wvutils.aws.secrets_fetch"></a>
 
 #### `secrets_fetch`
@@ -222,7 +226,7 @@ def secrets_fetch(
         region_name: AWSRegion) -> str | int | float | list | dict | None
 ```
 
-Request a secret string from Secrets.
+Request and decode a secret from Secrets.
 
 **Arguments**:
 
@@ -254,13 +258,13 @@ Execute a query in Athena.
 
 - _str | None_ - Query execution ID of the query.
 
-<a id="wvutils.aws.athena_retrieve_queries"></a>
+<a id="wvutils.aws.athena_retrieve_query"></a>
 
-#### `athena_retrieve_queries`
+#### `athena_retrieve_query`
 
 ```python
-def athena_retrieve_queries(qeid: str, database_name: str,
-                            region_name: AWSRegion) -> str | None
+def athena_retrieve_query(qeid: str, database_name: str,
+                          region_name: AWSRegion) -> str | None
 ```
 
 Retrieve the S3 URI for results of a query in Athena.
@@ -273,7 +277,11 @@ Retrieve the S3 URI for results of a query in Athena.
 
 **Returns**:
 
-- _str | None_ - Current status of the query, or S3 URI of the results.
+- _str | None_ - Current status of the query, or S3 URI where results are stored.
+
+**Raises**:
+
+- `ValueError` - If the query execution ID is unknown or missing.
 
 <a id="wvutils.aws.athena_stop_query"></a>
 

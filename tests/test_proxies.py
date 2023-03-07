@@ -7,26 +7,29 @@ from wvutils.proxies import (
 )
 
 
-class TestProxies(unittest.TestCase):
-    def test_https_to_http(self):
-        # Test using HTTPS
+class TestHttpsToHttp(unittest.TestCase):
+    def test_https(self):
         self.assertEqual(
             https_to_http("https://localhost:8080"),
             "http://localhost:8080",
         )
-        # Test using HTTP
+
+    def test_http(self):
         self.assertEqual(
             https_to_http("http://localhost:8080"),
             "http://localhost:8080",
         )
-        # Test using invalid (non-http/https) address
+
+    def test_invalid_address(self):
         with self.assertRaises(ValueError):
             https_to_http("localhost:8080")
 
+
+class TestProxies(unittest.TestCase):
     def test_prepare_http_proxy_for_requests(self):
         # Test using HTTP
         address = "https://localhost:8080"
-        self.assertEqual(
+        self.assertDictEqual(
             prepare_http_proxy_for_requests(address),
             {
                 "https_proxy": "https://localhost:8080",
@@ -37,7 +40,7 @@ class TestProxies(unittest.TestCase):
         )
         # Test using HTTPS
         address = "http://localhost:8080"
-        self.assertEqual(
+        self.assertDictEqual(
             prepare_http_proxy_for_requests(address),
             {
                 "https_proxy": "http://localhost:8080",
