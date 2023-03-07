@@ -1,6 +1,6 @@
-"""Custom Errors
+"""Custom errors.
 
-This module contains custom errors that are used throughout the package.
+This module contains custom exceptions that are used throughout the package.
 """
 
 from cloudpickle import pickle

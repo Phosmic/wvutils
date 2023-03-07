@@ -1,6 +1,6 @@
-"""AWS Utilities
+"""Utilities for interacting with AWS services.
 
-This module contains utilities for interacting with AWS services.
+This module provides utilities for interacting with AWS services.
 """
 
 import io
@@ -13,20 +13,20 @@ from botocore.exceptions import ClientError
 
 from wvutils.typing import AWSRegion, FilePath
 
+from wvutils.general import unnest_key
 from wvutils.path import resolve_path
 from wvutils.restruct import json_loads
-from wvutils.utils import unnest_key
 
 __all__ = [
     "athena_execute_query",
-    "athena_retrieve_queries",
+    "athena_retrieve_query",
     "athena_stop_query",
-    "boto3_resource",
+    "clear_boto3_sessions",
     "download_from_s3",
     "get_boto3_session",
     "parse_s3_uri",
-    "reset_boto3_sessions",
     "secrets_fetch",
+    "boto3_client_ctx",
     "upload_bytes_to_s3",
     "upload_file_to_s3",
 ]
@@ -37,7 +37,10 @@ _global_boto3_sessions: dict[AWSRegion, Session] = {}
 
 
 def get_boto3_session(region_name: AWSRegion) -> Session:
-    """Get a Boto3 Session (Threadsafe)
+    """Get the globally shared Boto3 session for a region (thread-safe).
+
+    Todo:
+        * Add support for other session parameters.
 
     Args:
         region_name (AWSRegion): Region name for the session.
@@ -50,21 +53,30 @@ def get_boto3_session(region_name: AWSRegion) -> Session:
     return _global_boto3_sessions[region_name]
 
 
-def reset_boto3_sessions():
-    """Reset the global boto3 sessions"""
+def clear_boto3_sessions():
+    """Clear all globally shared Boto3 sessions (thread-safe).
+
+    Returns:
+        bool: Whether any sessions were cleared.
+    """
+    had_sessions = bool(_global_boto3_sessions)
     _global_boto3_sessions.clear()
+    return had_sessions
 
 
 @contextmanager
-def boto3_resource(service_name: str, region_name: AWSRegion):
-    """Create a Boto3 Client for a AWS Resource (Threadsafe)
+def boto3_client_ctx(service_name: str, region_name: AWSRegion):
+    """Context manager for a Boto3 client (thread-safe).
+
+    Todo:
+        * Add support for other session parameters.
 
     Args:
         service_name (str): Name of the service.
         region_name (AWSRegion): Region name for the service.
 
     Yields:
-        Any: Boto3 resource.
+        Any: Boto3 client.
 
     Raises:
         ClientError: If an error occurs.
@@ -95,7 +107,7 @@ def boto3_resource(service_name: str, region_name: AWSRegion):
 
 
 def parse_s3_uri(s3_uri: str) -> tuple[str, str]:
-    """Parse the Bucket Name and Path from an S3 URI
+    """Parse the bucket name and path from a S3 URI.
 
     Args:
         s3_uri (str): S3 URI to parse.
@@ -115,7 +127,7 @@ def download_from_s3(
     region_name: AWSRegion,
     overwrite: bool = True,
 ) -> None:
-    """Download a File from S3
+    """Download a file from S3.
 
     Args:
         file_path (FilePath): Output path to use while downloading the file.
@@ -136,7 +148,7 @@ def download_from_s3(
 
     bucket_path = bucket_path.removeprefix("/")
     with open(file_path, "wb") as wbf:
-        with boto3_resource("s3", region_name=region_name) as s3_client:
+        with boto3_client_ctx("s3", region_name=region_name) as s3_client:
             s3_client.download_fileobj(bucket_name, bucket_path, wbf)
             logger.info(f"Downloaded s3://{bucket_name}/{bucket_path} to {file_path}")
 
@@ -147,7 +159,7 @@ def upload_file_to_s3(
     bucket_path: str,
     region_name: AWSRegion,
 ) -> None:
-    """Upload a File to S3
+    """Upload a file to S3.
 
     Args:
         file_path (FilePath): Path of the file to upload.
@@ -163,24 +175,32 @@ def upload_file_to_s3(
         raise FileNotFoundError(f"File not found: {file_path}")
 
     bucket_path = bucket_path.removeprefix("/")
-    with boto3_resource("s3", region_name=region_name) as s3_client:
+    with boto3_client_ctx("s3", region_name=region_name) as s3_client:
         s3_client.upload_file(file_path, bucket_name, bucket_path)
         logger.info(f"Uploaded {file_path} to s3://{bucket_name}/{bucket_path}")
 
 
 def upload_bytes_to_s3(
-    raw_b: bytes, bucket_name: str, bucket_path: str, region_name: AWSRegion
+    raw_b: bytes,
+    bucket_name: str,
+    bucket_path: str,
+    region_name: AWSRegion,
 ) -> None:
-    """Write Bytes to a File in S3
+    """Write bytes to a file in S3.
 
     Args:
         raw_b (bytes): Bytes of the file to be written.
         bucket_name (str): Name of the S3 bucket to upload the file to.
         bucket_path (str): Path in the S3 bucket to upload the file to.
         region_name (AWSRegion): Region name for S3.
+
+    Raises:
+        TypeError: If `raw_b` is not bytes.
     """
+    if not isinstance(raw_b, bytes):
+        raise TypeError(f"Expected bytes, got {type(raw_b)}")
     bucket_path = bucket_path.removeprefix("/")
-    with boto3_resource("s3", region_name=region_name) as s3_client:
+    with boto3_client_ctx("s3", region_name=region_name) as s3_client:
         s3_client.upload_fileobj(io.BytesIO(raw_b), bucket_name, bucket_path)
         logger.info(f"Uploaded raw bytes to s3://{bucket_name}/{bucket_path}")
 
@@ -189,7 +209,7 @@ def secrets_fetch(
     secret_name: str,
     region_name: AWSRegion,
 ) -> str | int | float | list | dict | None:
-    """Request a Secret String from Secrets
+    """Request and decode a secret from Secrets.
 
     Args:
         secret_name (str): Secret name to use.
@@ -198,7 +218,7 @@ def secrets_fetch(
     Returns:
         str | int | float | list | dict | None: Secret string.
     """
-    with boto3_resource("secretsmanager", region_name=region_name) as secrets_client:
+    with boto3_client_ctx("secretsmanager", region_name=region_name) as secrets_client:
         response = secrets_client.get_secret_value(SecretId=secret_name)
     secret_string = None
     if response.get("SecretString") is not None:
@@ -211,7 +231,7 @@ def athena_execute_query(
     database_name: str,
     region_name: AWSRegion,
 ) -> str | None:
-    """Execute a Query in Athena
+    """Execute a query in Athena.
 
     Args:
         query (str): Query to execute.
@@ -221,7 +241,7 @@ def athena_execute_query(
     Returns:
         str | None: Query execution ID of the query.
     """
-    with boto3_resource("athena", region_name=region_name) as athena_client:
+    with boto3_client_ctx("athena", region_name=region_name) as athena_client:
         response = athena_client.start_query_execution(
             QueryString=query,
             QueryExecutionContext={"Database": database_name},
@@ -238,12 +258,12 @@ def athena_execute_query(
     return qeid
 
 
-def athena_retrieve_queries(
+def athena_retrieve_query(
     qeid: str,
     database_name: str,
     region_name: AWSRegion,
 ) -> str | None:
-    """Retrieve the S3 URI for Results from a Athena Query
+    """Retrieve the S3 URI for results of a query in Athena.
 
     Args:
         qeid (str): Query execution ID of the query to fetch.
@@ -251,44 +271,46 @@ def athena_retrieve_queries(
         region_name (AWSRegion): Region name for Athena.
 
     Returns:
-        str | None: Current status of the query, or S3 URI of the results.
+        str | None: Current status of the query, or S3 URI where results are stored.
+
+    Raises:
+        ValueError: If the query execution ID is unknown or missing.
     """
-    with boto3_resource("athena", region_name=region_name) as athena_client:
+    with boto3_client_ctx("athena", region_name=region_name) as athena_client:
         response = athena_client.get_query_execution(QueryExecutionId=qeid)
 
     state = unnest_key(response, "QueryExecution", "Status", "State")
+    # Reference: https://docs.amazonaws.cn/athena/latest/APIReference/API_QueryExecutionStatus.html
     if state == "SUCCEEDED":
-        # Success
-        logger.info(
-            f"Finished executing QEID {qeid} on {database_name} ({region_name})"
-        )
-        # S3 URI of results
+        logger.info(f"QEID {qeid} succeeded on {database_name} ({region_name})")
+        # S3 URI where results are stored
         return unnest_key(
             response, "QueryExecution", "ResultConfiguration", "OutputLocation"
         )
-    if state == "RUNNING":
-        # Running
-        logger.debug(f"Still executing QEID {qeid} on {database_name} ({region_name})")
+    elif state == "RUNNING":
+        logger.debug(f"QEID {qeid} is running on {database_name} ({region_name})")
+        return state
     elif state == "QUEUED":
-        # Queued
-        logger.debug(f"Still executing QEID {qeid} on {database_name} ({region_name})")
+        logger.debug(f"QEID {qeid} is queued on {database_name} ({region_name})")
+        return state
     elif state == "FAILED":
-        # Failure
-        logger.info(
-            f"Failure to execute QEID {qeid} on {database_name} ({region_name})"
-        )
-    # else: TODO: Raise error here?
-    return state
+        logger.info(f"QEID {qeid} failed to execute on {database_name} ({region_name})")
+        return state
+    elif state == "CANCELLED":
+        logger.info(f"QEID {qeid} was cancelled on {database_name} ({region_name})")
+        return state
+    else:
+        raise ValueError(f"Unknown or missing state {state} for QEID {qeid}")
 
 
 def athena_stop_query(qeid: str, region_name: AWSRegion) -> None:
-    """Stop the Execution of a Query in Athena
+    """Stop the execution of a query in Athena.
 
     Args:
         qeid (str): Query execution ID of the query to stop.
         region_name (AWSRegion): Region name for Athena.
     """
     logger.info(f"Stopping QEID {qeid}")
-    with boto3_resource("athena", region_name=region_name) as athena_client:
+    with boto3_client_ctx("athena", region_name=region_name) as athena_client:
         athena_client.stop_query_execution(QueryExecutionId=qeid)
         logger.info(f"Halted execution of QEID {qeid}")

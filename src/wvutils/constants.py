@@ -1,6 +1,6 @@
-"""Constants
+"""Constant values.
 
-This module contains constants used throughout the package.
+This module contains constants that are used throughout the package.
 """
 
 from string import ascii_letters, digits
