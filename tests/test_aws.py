@@ -10,12 +10,12 @@ from moto import mock_s3, mock_secretsmanager
 
 from wvutils.aws import (
     athena_retrieve_query,
+    boto3_client_ctx,
     clear_boto3_sessions,
     download_from_s3,
     get_boto3_session,
     parse_s3_uri,
     secrets_fetch,
-    shared_boto3_ctx,
     upload_bytes_to_s3,
     upload_file_to_s3,
 )
@@ -80,7 +80,7 @@ class TestAWSContextHelper(unittest.TestCase):
         self.session_mock = Mock()
         self.client_mock = Mock()
         self.session_mock.client.return_value = self.client_mock
-        self.context_manager = shared_boto3_ctx(self.service_name, self.region_name)
+        self.context_manager = boto3_client_ctx(self.service_name, self.region_name)
 
     def tearDown(self):
         # Reset the global boto3 sessions
