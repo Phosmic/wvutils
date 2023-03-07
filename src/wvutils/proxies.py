@@ -1,4 +1,4 @@
-"""Proxy Utilities
+"""Utilities for working with proxies.
 
 This module provides utilities for working with proxies.
 """
@@ -16,11 +16,9 @@ logger = logging.getLogger(__name__)
 
 
 class ProxyManager:
-    """Proxy Manager
+    """Manages a list of proxies.
 
-    This class manages a list of proxies and provides a simple interface for
-    retrieving them. It also provides the ability to re-order the list of
-    proxies, and to re-use proxies.
+    This class manages a list of proxies, allowing for randomization, re-use, etc.
     """
 
     def __init__(
@@ -29,6 +27,13 @@ class ProxyManager:
         reuse: bool = False,
         random_order: bool = False,
     ) -> None:
+        """Initialize the proxy manager.
+
+        Args:
+            proxies (list[str]): List of proxy addresses.
+            reuse (bool, optional): Whether to reuse proxies. Defaults to False.
+            random_order (bool, optional): Whether to use random order. Defaults to False.
+        """
         # Unordered storage of proxy values
         self._proxy_store: list[str] = proxies.copy()
         self._reuse: bool = reuse
@@ -42,10 +47,10 @@ class ProxyManager:
         self._reset()
 
     def add_proxies(self, proxies: list[str], include_duplicates: bool = False) -> None:
-        """Add New Proxy Addresses
+        """Add additional proxy addresses.
 
         Args:
-            proxies (list[str]): List of proxies to add.
+            proxies (list[str]): List of proxy addresses.
         """
         if include_duplicates:
             # Include duplicates
@@ -56,11 +61,14 @@ class ProxyManager:
         self._reset()
 
     def set_proxies(self, proxies: list[str]) -> None:
-        """Replace All Proxy Addresses
+        """Set the proxy addresses.
+
+        Note: This will clear all existing proxies.
 
         Args:
-            proxies (list[str]): List of proxies
+            proxies (list[str]): List of proxy addresses.
         """
+        # Clear existing proxies
         self._proxy_store.clear()
         # Add new proxies
         self.add_proxies(proxies)
@@ -76,10 +84,10 @@ class ProxyManager:
 
     @property
     def can_cycle(self) -> bool:
-        """Whether the Proxy Manager Can Cycle to the Next Proxy
+        """Check if can cycle to the next proxy address.
 
         Returns:
-            bool: True if can cycle to next proxy, False otherwise.
+            bool: True if can cycle, False otherwise.
         """
         # Already locked
         if self._index == -1:
@@ -90,7 +98,7 @@ class ProxyManager:
         return True
 
     def cycle(self) -> None:
-        """User Method to Attempt to Increment the Index of the Current Proxy"""
+        """Attempt to cycle to the next proxy address."""
         # Cannot cycle when locked
         if self._index > -1:
             # Increment to next
@@ -109,22 +117,22 @@ class ProxyManager:
 
     @property
     def proxy(self) -> str | None:
-        """Current Proxy
+        """Current proxy address.
 
         Returns:
-            str | None: Current proxy or None if no proxies.
+            str | None: Current proxy, or None if no proxies.
         """
         return self._proxies[self._index] if self._index > -1 else None
 
 
 def https_to_http(address: str) -> str:
-    """Convert an HTTPS Proxy Address to HTTP
+    """Convert a HTTPS proxy address to HTTP.
 
     Args:
-        address (str): HTTPS proxy address
+        address (str): HTTPS proxy address.
 
     Returns:
-        str: HTTP proxy address
+        str: HTTP proxy address.
     """
     if address.startswith("https://"):
         return "http" + address.removeprefix("https")
@@ -134,16 +142,16 @@ def https_to_http(address: str) -> str:
 
 
 def prepare_http_proxy_for_requests(address: str) -> dict[str, str]:
-    """Prepare a HTTP(S) Proxy Address for use with Requests
+    """Prepare a HTTP(S) proxy address for use with the 'requests' library.
 
     Args:
-        address (str): HTTP(S) Proxy address
+        address (str): HTTP(S) proxy address.
 
     Returns:
-        dict[str, str]: Dictionary of proxy addresses
+        dict[str, str]: Dictionary of HTTP and HTTPS proxy addresses.
 
     Raises:
-        ValueError: If the address is not a valid HTTP(S) proxy address.
+        ValueError: If the address does not start with 'http(s)://'.
     """
     if address.startswith("https://"):
         return {

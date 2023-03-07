@@ -1,27 +1,23 @@
-"""Custom Data Types"""
+"""Custom type aliases and type variables.
+
+This module contains custom type aliases and type variables used throughout the package.
+"""
 
 import collections
 import io
 from collections.abc import Hashable
 from os import PathLike
-from typing import (
-    Literal,
-    TypeAlias,
-    TypeVar,
-)
+from typing import Literal, TypeAlias  # TypeVar
 
 __all__ = [
     "AWSRegion",
     "FileObject",
+    "FilePath",
     "JSONEncodable",
-    "JSONEncoded",
     "MD5Hashable",
-    "MD5Hashed",
     "Mask",
     "Masks",
-    "FilePath",
     "PickleSerializable",
-    "PickleSerialized",
     "Span",
     "Spans",
 ]
@@ -32,23 +28,16 @@ FilePath: TypeAlias = str | PathLike
 # File Object
 FileObject: TypeAlias = io.TextIOBase | io.BytesIO
 
-# Masks and spans
+# Spans and Masks
 Span: TypeAlias = list[int] | tuple[int, int]
 Spans: TypeAlias = list[Span] | collections.deque[Span]
 Mask: TypeAlias = str
 Masks: TypeAlias = list[Mask] | collections.deque[Mask]
 
-# JSON
+# Serialization
 JSONEncodable: TypeAlias = str | int | float | bool | list | dict
-JSONEncoded: TypeAlias = str
-
-# Pickle
-PickleSerializable: TypeAlias = JSONEncodable
-PickleSerialized: TypeAlias = bytes
-
-# Hash
-MD5Hashable: TypeAlias = JSONEncodable | Hashable
-MD5Hashed: TypeAlias = str
+PickleSerializable: TypeAlias = object
+MD5Hashable: TypeAlias = JSONEncodable | tuple | set | Hashable
 
 # AWS
 AWSRegion: TypeAlias = Literal[

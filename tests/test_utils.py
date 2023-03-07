@@ -3,7 +3,7 @@ import sys
 import tempfile
 import unittest
 
-from wvutils.utils import (
+from wvutils.general import (
     chunker,
     count_lines_in_file,
     gc_set_threshold,
@@ -20,24 +20,36 @@ class TestCountLinesInFile(unittest.TestCase):
             self.assertEqual(count_lines_in_file(fp.name), 1)
 
     def test_single_line_file(self):
+        file_contents = "This is a single line"
         with tempfile.NamedTemporaryFile() as fp:
-            fp.write(b"This is a single line")
+            fp.write(file_contents.encode("utf-8"))
             fp.seek(0)
             self.assertEqual(count_lines_in_file(fp.name), 1)
 
     def test_multiple_lines_file(self):
-        with tempfile.NamedTemporaryFile() as fp:
-            fp.write(
-                b"This is the first line\nThis is the second line\nThis is the third line"
+        file_contents = "\n".join(
+            (
+                "This is the first line",
+                "This is the second line",
+                "This is the third line",
             )
+        )
+        with tempfile.NamedTemporaryFile() as fp:
+            fp.write(file_contents.encode("utf-8"))
             fp.seek(0)
             self.assertEqual(count_lines_in_file(fp.name), 3)
 
     def test_file_with_newline_at_end(self):
-        with tempfile.NamedTemporaryFile() as fp:
-            fp.write(
-                b"This is the first line\nThis is the second line\nThis is the third line\n"
+        file_contents = "\n".join(
+            (
+                "This is the first line",
+                "This is the second line",
+                "This is the third line",
             )
+        )
+        file_contents += "\n"
+        with tempfile.NamedTemporaryFile() as fp:
+            fp.write(file_contents.encode("utf-8"))
             fp.seek(0)
             self.assertEqual(count_lines_in_file(fp.name), 4)
 
@@ -170,7 +182,7 @@ class TestRenameKey(unittest.TestCase):
         ]
         # Test with different types of keys and values
         for obj, src_key, dest_key, expected_result in test_cases:
-            self.assertEqual(rename_key(obj, src_key, dest_key), expected_result)
+            self.assertDictEqual(rename_key(obj, src_key, dest_key), expected_result)
 
     def test_rename_key_with_different_types_in_place(self):
         test_cases = [
@@ -214,29 +226,29 @@ class TestRenameKey(unittest.TestCase):
         # Test with different types of keys and values
         for obj, src_key, dest_key, expected_result in test_cases:
             rename_key(obj, src_key, dest_key, in_place=True)
-            self.assertEqual(obj, expected_result)
+            self.assertDictEqual(obj, expected_result)
 
     def test_rename_key_missing_src_key(self):
         obj = {"key": "value"}
         obj_copy = rename_key(obj, "missing_key", "new_key")
-        self.assertEqual(obj_copy, obj)
-        self.assertEqual(obj_copy, {"key": "value"})
+        self.assertDictEqual(obj_copy, obj)
+        self.assertDictEqual(obj_copy, {"key": "value"})
         self.assertNotIn("new_key", obj_copy)
 
     def test_rename_key_missing_src_key_in_place(self):
         obj = {"key": "value"}
         obj_copy = rename_key(obj, "missing_key", "new_key")
-        self.assertEqual(obj_copy, {"key": "value"})
+        self.assertDictEqual(obj_copy, {"key": "value"})
         self.assertNotIn("new_key", obj_copy)
 
     def test_rename_key_complex_obj(self):
         obj = {"key": "value", "nested": {"key": "value"}, "list": [1, 2, 3]}
         obj_copy = rename_key(obj, "key", "new_key")
-        self.assertEqual(
+        self.assertDictEqual(
             obj_copy,
             {"new_key": "value", "nested": {"key": "value"}, "list": [1, 2, 3]},
         )
-        self.assertEqual(
+        self.assertDictEqual(
             obj,
             {"key": "value", "nested": {"key": "value"}, "list": [1, 2, 3]},
         )
@@ -244,30 +256,30 @@ class TestRenameKey(unittest.TestCase):
     def test_rename_key_missing_src_key(self):
         obj = {"a": 1, "b": 2, "c": 3}
         obj_copy = rename_key(obj, "missing_key", "new_key")
-        self.assertEqual(obj_copy, obj)
+        self.assertDictEqual(obj_copy, obj)
 
     def test_rename_key_existing_dest_key(self):
         obj = {"a": 1, "b": 2, "c": 3}
         obj_copy = rename_key(obj, "b", "a")
         expected_obj = {"a": 2, "c": 3}
-        self.assertEqual(obj_copy, expected_obj)
+        self.assertDictEqual(obj_copy, expected_obj)
 
     def test_rename_key_src_and_dest_key_same(self):
         obj = {"a": 1, "b": 2, "c": 3}
         obj_copy = rename_key(obj, "b", "b")
-        self.assertEqual(obj, obj_copy)
+        self.assertDictEqual(obj, obj_copy)
 
     def test_rename_key_empty_dict(self):
         obj = {}
         obj_copy = rename_key(obj, "key", "new_key")
-        self.assertEqual(obj_copy, {})
-        self.assertEqual(obj, {})
+        self.assertDictEqual(obj_copy, {})
+        self.assertDictEqual(obj, {})
 
     def test_rename_key_with_overwrite(self):
         obj = {"key": "value", "new_key": "overwrite_me"}
         obj_copy = rename_key(obj, "key", "new_key")
-        self.assertEqual(obj_copy, {"new_key": "value"})
-        self.assertEqual(obj, {"key": "value", "new_key": "overwrite_me"})
+        self.assertDictEqual(obj_copy, {"new_key": "value"})
+        self.assertDictEqual(obj, {"key": "value", "new_key": "overwrite_me"})
 
 
 class TestUnnestKey(unittest.TestCase):
@@ -279,12 +291,12 @@ class TestUnnestKey(unittest.TestCase):
     def test_unnest_key_invalid_input(self):
         obj = {"a": {"b": {"c": 1}}}
         result = unnest_key(obj, "a", "b", "d")
-        self.assertIs(result, None)
+        self.assertIsNone(result)
 
     def test_unnest_key_empty_input(self):
         obj = {}
         result = unnest_key(obj, "a", "b", "c")
-        self.assertIs(result, None)
+        self.assertIsNone(result)
 
     def test_unnest_key_valid_input_with_large_nest(self):
         obj = {"a": {"b": {"c": {"d": {"e": {"f": {"g": {"h": 1}}}}}}}}

@@ -1,29 +1,31 @@
-"""Restructure Data
+"""Utilities for restructuring data.
 
-This module contains functions for restructuring data.
+This module provides utilities for restructuring data, including serialization and hashing.
 
 JSON
 
-| Python                                     | JSON        |
-| :----------------------------------------- | :---------- |
-| dict                                       | object      |
-| list, tuple                                | array       |
-| str                                        | string      |
-| int, float, int- & float-derived enums     | number      |
-| True                                       | true        |
-| False                                      | false       |
-| None                                       | null        |
+| Python                                 | JSON   |
+| :------------------------------------- | :----- |
+| dict                                   | object |
+| list, tuple                            | array  |
+| str                                    | string |
+| int, float, int- & float-derived enums | number |
+| True                                   | true   |
+| False                                  | false  |
+| None                                   | null   |
 
 Hash
 
--   No content
+> No content.
 
 Pickle
 
--   An important difference between cloudpickle and pickle is that cloudpickle can serialize a function or class by value, whereas pickle can only serialize it by reference.
-    Serialization by reference treats functions and classes as attributes of modules, and pickles them through instructions that trigger the import of their module at load time.
-    Serialization by reference is thus limited in that it assumes that the module containing the function or class is available/importable in the unpickling environment.
-    This assumption breaks when pickling constructs defined in an interactive session, a case that is automatically detected by cloudpickle, that pickles such constructs by value.
+> An important difference between cloudpickle and pickle is that cloudpickle can serialize a function or class by value, whereas pickle can only serialize it by reference.
+> Serialization by reference treats functions and classes as attributes of modules, and pickles them through instructions that trigger the import of their module at load time.
+> Serialization by reference is thus limited in that it assumes that the module containing the function or class is available/importable in the unpickling environment.
+> This assumption breaks when pickling constructs defined in an interactive session, a case that is automatically detected by cloudpickle, that pickles such constructs by value.
+
+Read more: https://github.com/cloudpipe/cloudpickle/blob/master/README.md#overriding-pickles-serialization-mechanism-for-importable-constructs
 """
 
 import collections
@@ -44,11 +46,8 @@ from wvutils.errors import (
 from wvutils.typing import (
     FilePath,
     JSONEncodable,
-    JSONEncoded,
     MD5Hashable,
-    MD5Hashed,
     PickleSerializable,
-    PickleSerialized,
 )
 
 from wvutils.path import resolve_path
@@ -72,14 +71,14 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def json_dumps(obj: JSONEncodable) -> JSONEncoded:
-    """Encode an Object as JSON
+def json_dumps(obj: JSONEncodable) -> str:
+    """Encode an object as JSON.
 
     Args:
         obj (JSONEncodable): Object to encode.
 
     Returns:
-        JSONEncoded: Object encoded as JSON.
+        str: Object encoded as JSON.
 
     Raises:
         JSONEncodeError: If the object could not be encoded.
@@ -90,14 +89,14 @@ def json_dumps(obj: JSONEncodable) -> JSONEncoded:
         raise err
 
 
-def jsonl_dumps(objs: Iterable[JSONEncodable]) -> JSONEncoded:
-    """Encode Objects as JSONL
+def jsonl_dumps(objs: Iterable[JSONEncodable]) -> str:
+    """Encode objects as JSONL.
 
     Args:
         objs (Iterable[JSONEncodable]): Objects to encode.
 
     Returns:
-        JSONEncoded: Objects encoded as JSONL.
+        str: Objects encoded as JSONL.
 
     Raises:
         JSONEncodeError: If the object could not be encoded.
@@ -106,7 +105,7 @@ def jsonl_dumps(objs: Iterable[JSONEncodable]) -> JSONEncoded:
 
 
 def json_dump(file_path: str, obj: JSONEncodable) -> None:
-    """Encode an Object as JSON and Write it to a File
+    """Encode an object as JSON and write it to a file.
 
     Args:
         file_path (str): Path of the file to open.
@@ -124,7 +123,7 @@ def json_dump(file_path: str, obj: JSONEncodable) -> None:
 
 
 def jsonl_dump(file_path: str, objs: Iterable[JSONEncodable]) -> None:
-    """Encode Objects as JSONL and Write them to a File
+    """Encode objects as JSONL and write them to a file.
 
     Args:
         file_path (str): Path of the file to open.
@@ -138,11 +137,11 @@ def jsonl_dump(file_path: str, objs: Iterable[JSONEncodable]) -> None:
         wf.write(jsonl_dumps(objs))
 
 
-def json_loads(encoded_obj: JSONEncoded) -> JSONEncodable:
-    """Decode a JSON-Encoded Object
+def json_loads(encoded_obj: str) -> JSONEncodable:
+    """Decode a JSON-encoded object.
 
     Args:
-        encoded_obj (JSONEncoded): Object to decode.
+        encoded_obj (str): Object to decode.
 
     Returns:
         JSONEncodable: Decoded object.
@@ -157,7 +156,7 @@ def json_loads(encoded_obj: JSONEncoded) -> JSONEncodable:
 
 
 def json_load(file_path: FilePath) -> JSONEncodable:
-    """Decode a File Containing a JSON-Encoded Object
+    """Decode a file containing a JSON-encoded object.
 
     Args:
         file_path (FilePath): Path of the file to open.
@@ -178,9 +177,10 @@ def json_load(file_path: FilePath) -> JSONEncodable:
 
 def jsonl_loader(
     file_path: FilePath,
+    *,
     allow_empty_lines: bool = True,
 ) -> Generator[JSONEncodable, None, None]:
-    """Decode a File Containing JSON-Encoded Objects in JSONL
+    """Decode a file containing JSON-encoded objects, one per line.
 
     Args:
         file_path (FilePath): Path of the file to open.
@@ -207,7 +207,7 @@ def jsonl_loader(
 
 
 def squeegee_loader(file_path: FilePath) -> Generator[JSONEncodable, None, None]:
-    """Automatically Decode a File Containing JSON-Encoded Objects
+    """Automatically decode a file containing JSON-encoded objects.
 
     Supports multiple formats (JSON, JSONL, JSONL of JSONL, etc).
 
@@ -249,14 +249,16 @@ def squeegee_loader(file_path: FilePath) -> Generator[JSONEncodable, None, None]
                     yield single_content
 
 
-def gen_hash(obj: MD5Hashable) -> MD5Hashed | None:
-    """Create an MD5 Hash from an JSONEncodable Object
+def gen_hash(obj: MD5Hashable) -> str | None:
+    """Create an MD5 hash from a hashable object.
+
+    Note: Tuples and sets are not hashable, so they are converted to lists.
 
     Args:
         obj (MD5Hashable): Object to hash.
 
     Returns:
-        MD5Hashed | None: MD5 hash of the object or None if object was an empty iterable.
+        str | None: MD5 hash of the object, or None if object was an empty iterable.
 
     Raises:
         HashEncodeError: If the object could not be encoded.
@@ -269,11 +271,13 @@ def gen_hash(obj: MD5Hashable) -> MD5Hashed | None:
         elif isinstance(obj, str):
             # Encode string
             obj_b = obj.encode("utf-8")
-        elif isinstance(obj, (list, collections.deque)):
-            # Encode list or deque as JSONL-encoded list
-            # TODO: Could add support for tuple and set, and combine with list below since 'jsonl_dumps' accepts iterables.
-            #       Worth noting that this may confuse the user, as hashing (0, 1, 2) or {0, 1, 2} or [0, 1, 2] would be effectively the same.
+        elif isinstance(obj, list):
+            # Encode list as JSONL-encoded list
             obj_b = jsonl_dumps(obj).encode("utf-8")
+        elif isinstance(obj, (tuple, collections.deque)):
+            # Encode tuple or deque as JSONL-encoded list
+            obj_list = list(obj)
+            obj_b = jsonl_dumps(obj_list).encode("utf-8")
         elif isinstance(obj, (dict, int, float, bool)):
             # Encode remaining built-ins as JSON
             obj_b = json_dumps(obj).encode("utf-8")
@@ -286,7 +290,7 @@ def gen_hash(obj: MD5Hashable) -> MD5Hashed | None:
 
 
 def pickle_dump(file_path: FilePath, obj: PickleSerializable) -> None:
-    """Serialize an Object as a Pickle and Write it to a File
+    """Serialize an object as a pickle and write it to a file.
 
     Args:
         file_path (FilePath): Path of the file to write.
@@ -302,14 +306,14 @@ def pickle_dump(file_path: FilePath, obj: PickleSerializable) -> None:
             raise err
 
 
-def pickle_dumps(obj: PickleSerializable) -> PickleSerialized:
-    """Serialize an Object as a Pickle
+def pickle_dumps(obj: PickleSerializable) -> bytes:
+    """Serialize an object as a pickle.
 
     Args:
         obj (PickleSerializable): Object to serialize.
 
     Returns:
-        PickleSerialized: Serialized object.
+        bytes: Serialized object.
 
     Raises:
         PickleEncodeError: If the object could not be encoded.
@@ -321,9 +325,9 @@ def pickle_dumps(obj: PickleSerializable) -> PickleSerialized:
 
 
 def pickle_load(file_path: FilePath) -> PickleSerializable:
-    """Deserialize Pickle-Serialized Object from a File
+    """Deserialize a pickle-serialized object from a file.
 
-    NOTE: Not safe for large files.
+    Note: Not safe for large files.
 
     Args:
         file_path (FilePath): Path of the file to open.
@@ -341,11 +345,11 @@ def pickle_load(file_path: FilePath) -> PickleSerializable:
             raise err
 
 
-def pickle_loads(serialized_obj: PickleSerialized) -> PickleSerializable:
-    """Deserialize Pickle-Serialized Object
+def pickle_loads(serialized_obj: bytes) -> PickleSerializable:
+    """Deserialize a pickle-serialized object.
 
     Args:
-        serialized_obj (PickleSerialized): Object to deserialize.
+        serialized_obj (bytes): Object to deserialize.
 
     Returns:
         PickleSerializable: Deserialized object.

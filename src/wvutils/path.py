@@ -1,4 +1,4 @@
-"""Path Utilities
+"""Utilities for working with paths.
 
 This module provides utilities for working with paths.
 """
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 # def is_iolike(potential_io: Any) -> bool:
-#     """Check if an Object is IO-Like
+#     """Check if an object is IO-like.
 #
 #     Args:
 #         potential_io (Any): Object to check.
@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 def is_pathlike(potential_path: Any) -> bool:
-    """Check if an Object is Path-Like
+    """Check if an object is path-like.
 
     Args:
         potential_path (Any): Object to check.
@@ -47,7 +47,7 @@ def is_pathlike(potential_path: Any) -> bool:
 
 
 def stringify_path(file_path: FilePath) -> str:
-    """Resolve a Path-Like Object to a String
+    """Stringify a path-like object.
 
     Args:
         file_path (FilePath): Path-like object to stringify.
@@ -68,7 +68,7 @@ def stringify_path(file_path: FilePath) -> str:
 
 
 def ensure_abspath(file_path: str) -> str:
-    """Make a Path Absolute if it is Not Already
+    """Make a path absolute if it is not already.
 
     Args:
         file_path (str): Path to ensure is absolute.
@@ -80,7 +80,7 @@ def ensure_abspath(file_path: str) -> str:
 
 
 def resolve_path(file_path: FilePath) -> str:
-    """Resolve a Path-Like Object to an Absolute Path that is a String
+    """Stringify and resolve a path-like object.
 
     Args:
         file_path (FilePath): Path-like object to resolve.
@@ -92,7 +92,7 @@ def resolve_path(file_path: FilePath) -> str:
 
 
 def xdg_cache_path() -> str:
-    """Base Directory to Store User-Specific Non-Essential Data Files
+    """Base directory to store user-specific non-essential data files.
 
     This should be '${HOME}/.cache', but the 'HOME' environment variable may not exist on non-POSIX-compliant systems.
     On POSIX-compliant systems, the XDG base directory specification is followed exactly since '~' expands to '$HOME' if it is present.
