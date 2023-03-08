@@ -10,6 +10,7 @@ from moto import mock_s3, mock_secretsmanager
 
 from wvutils.aws import (
     athena_retrieve_query,
+    athena_stop_query,
     boto3_client_ctx,
     clear_boto3_sessions,
     download_from_s3,
@@ -456,3 +457,23 @@ class TestAthenaRetrieveQuery(unittest.TestCase):
                     self.database_name,
                     self.region_name,
                 )
+
+
+class TestAthenaStopQuery(unittest.TestCase):
+    def setUp(self):
+        self.region_name = "us-east-1"
+        self.query_execution_id = "abc1234d-5efg-67hi-jklm-89n0op12qr34"
+        self.session_mock = Mock()
+        self.client_mock = Mock()
+        self.session_mock.client.return_value = self.client_mock
+
+    def tearDown(self):
+        # Reset the global boto3 sessions
+        clear_boto3_sessions()
+
+    def test_stop_query(self):
+        with patch("wvutils.aws.Session", return_value=self.session_mock):
+            athena_stop_query(self.query_execution_id, self.region_name)
+        self.client_mock.stop_query_execution.assert_called_once_with(
+            QueryExecutionId=self.query_execution_id
+        )
