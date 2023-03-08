@@ -235,10 +235,10 @@ class TestUploadFileToS3(unittest.TestCase):
                 "Hello World!",
             )
 
-    def test_upload_file_to_s3_with_non_existent_file(self):
+    def test_upload_file_to_s3_with_nonexistent_file(self):
         with self.assertRaises(FileNotFoundError):
             upload_file_to_s3(
-                "/tmp/non-existent-file",
+                "/tmp/nonexistent-file",
                 self.bucket_name,
                 self.bucket_path,
                 self.region_name,
@@ -382,7 +382,37 @@ class TestAthenaRetrieveQuery(unittest.TestCase):
             )
         self.assertEqual(state_or_s3_uri, self.s3_output_location)
 
-    def test_query_state_unexpected_type(self):
+    def test_query_state_unexpected_value(self):
+        self.client_mock.get_query_execution.return_value = {
+            "QueryExecution": {
+                "QueryExecutionId": self.query_execution_id,
+                "Status": {"State": "SOMETHING ELSE"},
+            },
+        }
+        with patch("wvutils.aws.Session", return_value=self.session_mock):
+            with self.assertRaises(ValueError):
+                athena_retrieve_query(
+                    self.query_execution_id,
+                    self.database_name,
+                    self.region_name,
+                )
+
+    def test_query_state_unexpected_type_of_None(self):
+        self.client_mock.get_query_execution.return_value = {
+            "QueryExecution": {
+                "QueryExecutionId": self.query_execution_id,
+                "Status": {"State": None},
+            },
+        }
+        with patch("wvutils.aws.Session", return_value=self.session_mock):
+            with self.assertRaises(ValueError):
+                athena_retrieve_query(
+                    self.query_execution_id,
+                    self.database_name,
+                    self.region_name,
+                )
+
+    def test_query_state_unexpected_type_of_int(self):
         self.client_mock.get_query_execution.return_value = {
             "QueryExecution": {
                 "QueryExecutionId": self.query_execution_id,
@@ -397,11 +427,11 @@ class TestAthenaRetrieveQuery(unittest.TestCase):
                     self.region_name,
                 )
 
-    def test_query_state_unexpected_value(self):
+    def test_query_state_unexpected_type_of_float(self):
         self.client_mock.get_query_execution.return_value = {
             "QueryExecution": {
                 "QueryExecutionId": self.query_execution_id,
-                "Status": {"State": "SOMETHING ELSE"},
+                "Status": {"State": 1.1},
             },
         }
         with patch("wvutils.aws.Session", return_value=self.session_mock):

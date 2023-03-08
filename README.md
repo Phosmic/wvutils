@@ -298,6 +298,64 @@ Stop the execution of a query in Athena.
 - `qeid` _str_ - Query execution ID of the query to stop.
 - `region_name` _AWSRegion_ - Region name for Athena.
 
+<a id="wvutils.errors"></a>
+
+# `wvutils.errors`
+
+Custom errors.
+
+This module contains custom exceptions that are used throughout the package.
+
+<a id="wvutils.errors.JSONEncodeError"></a>
+
+## `JSONEncodeError` Objects
+
+```python
+class JSONEncodeError(TypeError)
+```
+
+Raised when JSON encoding fails.
+
+<a id="wvutils.errors.JSONDecodeError"></a>
+
+## `JSONDecodeError` Objects
+
+```python
+class JSONDecodeError(TypeError, RapidJSONDecodeError)
+```
+
+Raised when JSON decoding fails.
+
+<a id="wvutils.errors.PickleEncodeError"></a>
+
+## `PickleEncodeError` Objects
+
+```python
+class PickleEncodeError(TypeError, pickle.PicklingError)
+```
+
+Raised when pickling fails.
+
+<a id="wvutils.errors.PickleDecodeError"></a>
+
+## `PickleDecodeError` Objects
+
+```python
+class PickleDecodeError(TypeError, pickle.UnpicklingError)
+```
+
+Raised when unpickling fails.
+
+<a id="wvutils.errors.HashEncodeError"></a>
+
+## `HashEncodeError` Objects
+
+```python
+class HashEncodeError(TypeError, ValueError, AttributeError)
+```
+
+Raised when hashing fails.
+
 <a id="wvutils.path"></a>
 
 # `wvutils.path`
