@@ -8,7 +8,7 @@ on:
     paths-ignore: ["doc/**"]
 
 env:
-  YOGGER_CI: 1
+  WVUTILS_CI: 1
 
 permissions:
   contents: read

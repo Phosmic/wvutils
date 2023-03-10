@@ -11,6 +11,7 @@
         },
         "repo": {
             "name": "wvutils",
+            "full_name": "WVUtils",
             "owner": "Phosmic",
             "badge_style": "flat-square",
             "primary_branch": "master",
