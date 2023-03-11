@@ -667,10 +667,11 @@ This module provides general utilities for working with Python.
 def count_lines_in_file(file_path: FilePath) -> int
 ```
 
-Count the Number of Lines in a File
+Count the number of lines in a file.
 
-All files have at least 1 line:
-number of lines = # of newlines + 1
+**Notes**:
+
+  All files have at least 1 line (# of lines = # of newlines + 1).
 
 **Arguments**:
 
@@ -688,7 +689,7 @@ number of lines = # of newlines + 1
 def sys_set_recursion_limit() -> None
 ```
 
-Raise Recursion Limit to Allow for More Recurse
+Raise recursion limit to allow for more recurse.
 
 <a id="wvutils.general.gc_set_threshold"></a>
 
@@ -713,7 +714,7 @@ def chunker(seq: Sequence[Any],
             n: int) -> Generator[Sequence[Any], None, None]
 ```
 
-Iterate a Sequence in Chunks
+Iterate a sequence in size `n` chunks.
 
 **Arguments**:
 
@@ -724,6 +725,10 @@ Iterate a Sequence in Chunks
 
 - _Sequence[Any]_ - Chunk of values with length <= n.
 
+**Raises**:
+
+- `ValueError` - If `n` is 0 or negative.
+
 <a id="wvutils.general.is_iterable"></a>
 
 #### `is_iterable`
@@ -732,7 +737,7 @@ Iterate a Sequence in Chunks
 def is_iterable(obj: Any) -> bool
 ```
 
-Check if an Object is Iterable
+Check if an object is iterable.
 
 **Arguments**:
 
@@ -753,7 +758,7 @@ def rename_key(obj: dict,
                in_place: bool = False) -> dict | None
 ```
 
-Rename a Dictionary Key
+Rename a dictionary key.
 
 **Arguments**:
 
@@ -771,10 +776,10 @@ Rename a Dictionary Key
 #### `unnest_key`
 
 ```python
-def unnest_key(obj: dict, *keys: str) -> Any
+def unnest_key(obj: dict, *keys: str) -> Any | None
 ```
 
-Fetch a Value from a Deeply Nested Dictionary
+Fetch a value from a deeply nested dictionary.
 
 **Arguments**:
 
@@ -783,7 +788,7 @@ Fetch a Value from a Deeply Nested Dictionary
 
 **Returns**:
 
-- _Any_ - The result of the provided keys.
+- _Any | None_ - The result of the provided keys, or None if any key is not found.
 
 <a id="wvutils.restruct"></a>
 

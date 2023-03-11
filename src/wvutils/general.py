@@ -29,19 +29,22 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def _count_generator(bytes_io: BufferedReader) -> Generator[bytes, None, None]:
+def _count_generator(
+    bytes_io: BufferedReader,
+    buffer_size: int = 1024 * 1024,
+) -> Generator[bytes, None, None]:
     reader = bytes_io.raw.read
-    b = reader(1024 * 1024)
-    while b:
-        yield b
-        b = reader(1024 * 1024)
+    chunk_b = reader(buffer_size)
+    while chunk_b:
+        yield chunk_b
+        chunk_b = reader(buffer_size)
 
 
 def count_lines_in_file(file_path: FilePath) -> int:
-    """Count the Number of Lines in a File
+    """Count the number of lines in a file.
 
-    All files have at least 1 line:
-        number of lines = # of newlines + 1
+    Note:
+        All files have at least 1 line (# of lines = # of newlines + 1).
 
     Args:
         file_path (FilePath): Path of the file to count lines in.
@@ -50,15 +53,15 @@ def count_lines_in_file(file_path: FilePath) -> int:
         int: Total number of lines in the file.
     """
     file_path = resolve_path(file_path)
-    num_lines = 1
+    line_count = 1
     with open(file_path, mode="rb") as rbf:
         for buffer in _count_generator(rbf):
-            num_lines += buffer.count(b"\n")
-    return num_lines
+            line_count += buffer.count(b"\n")
+    return line_count
 
 
 def sys_set_recursion_limit() -> None:
-    """Raise Recursion Limit to Allow for More Recurse"""
+    """Raise recursion limit to allow for more recurse."""
     sys.setrecursionlimit(10000)
     logger.debug("Adjusted Python recursion to allow more recurse")
 
@@ -76,7 +79,7 @@ def gc_set_threshold() -> None:
 
 
 def chunker(seq: Sequence[Any], n: int) -> Generator[Sequence[Any], None, None]:
-    """Iterate a Sequence in Chunks
+    """Iterate a sequence in size `n` chunks.
 
     Args:
         seq (Sequence[Any]): Sequence of values.
@@ -84,6 +87,9 @@ def chunker(seq: Sequence[Any], n: int) -> Generator[Sequence[Any], None, None]:
 
     Yields:
         Sequence[Any]: Chunk of values with length <= n.
+
+    Raises:
+        ValueError: If `n` is 0 or negative.
     """
     if n == 0:
         raise ValueError("n should be non-zero")
@@ -94,7 +100,7 @@ def chunker(seq: Sequence[Any], n: int) -> Generator[Sequence[Any], None, None]:
 
 
 def is_iterable(obj: Any) -> bool:
-    """Check if an Object is Iterable
+    """Check if an object is iterable.
 
     Args:
         obj (Any): Object to check.
@@ -115,7 +121,7 @@ def rename_key(
     dest_key: str,
     in_place: bool = False,
 ) -> dict | None:
-    """Rename a Dictionary Key
+    """Rename a dictionary key.
 
     Args:
         obj (dict): Reference to the dictionary to modify.
@@ -136,15 +142,15 @@ def rename_key(
         return obj_copy
 
 
-def unnest_key(obj: dict, *keys: str) -> Any:
-    """Fetch a Value from a Deeply Nested Dictionary
+def unnest_key(obj: dict, *keys: str) -> Any | None:
+    """Fetch a value from a deeply nested dictionary.
 
     Args:
         obj (dict): Dictionary to recursively iterate.
         *keys (str): Ordered keys to fetch.
 
     Returns:
-        Any: The result of the provided keys.
+        Any | None: The result of the provided keys, or None if any key is not found.
     """
     found = obj
     for key in keys:
