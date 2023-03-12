@@ -33,7 +33,7 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-_global_boto3_sessions: dict[AWSRegion, Session] = {}
+_boto3_sessions: dict[AWSRegion, Session] = {}
 
 
 def get_boto3_session(region_name: AWSRegion) -> Session:
@@ -48,9 +48,9 @@ def get_boto3_session(region_name: AWSRegion) -> Session:
     Returns:
         Session: Boto3 session.
     """
-    if region_name not in _global_boto3_sessions:
-        _global_boto3_sessions[region_name] = Session(region_name=region_name)
-    return _global_boto3_sessions[region_name]
+    if region_name not in _boto3_sessions:
+        _boto3_sessions[region_name] = Session(region_name=region_name)
+    return _boto3_sessions[region_name]
 
 
 def clear_boto3_sessions():
@@ -59,8 +59,8 @@ def clear_boto3_sessions():
     Returns:
         bool: Whether any sessions were cleared.
     """
-    had_sessions = bool(_global_boto3_sessions)
-    _global_boto3_sessions.clear()
+    had_sessions = bool(_boto3_sessions)
+    _boto3_sessions.clear()
     return had_sessions
 
 
