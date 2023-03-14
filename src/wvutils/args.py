@@ -16,7 +16,7 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def nonempty_string(name: str) -> Callable:
+def nonempty_string(name: str) -> Callable[[str], str]:
     """Ensure a string is non-empty.
 
     Example Usage:
@@ -33,7 +33,7 @@ def nonempty_string(name: str) -> Callable:
         name (str): Name of the function, used for debugging.
 
     Returns:
-        Callable: The decorated function.
+        Callable[[str], str]: The decorated function.
     """
 
     def func(text):
@@ -49,7 +49,7 @@ def nonempty_string(name: str) -> Callable:
 def safechars_string(
     name: str,
     allowed_chars: str | set[str] | tuple[str] | list[str] | None = None,
-) -> Callable:
+) -> Callable[[str], str]:
     """Ensure a string contains only safe characters.
 
     Example Usage:
@@ -67,7 +67,7 @@ def safechars_string(
         allowed_chars (str | set[str] | tuple[str] | list[str] | None, optional): Custom characters used to validate the function name. Defaults to None.
 
     Returns:
-        Callable: The decorated function.
+        Callable[[str], str]: The decorated function.
     """
     if allowed_chars is None:
         # Default to alphanum

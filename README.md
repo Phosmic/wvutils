@@ -596,7 +596,7 @@ This module provides utilities for parsing arguments from the command line.
 #### `nonempty_string`
 
 ```python
-def nonempty_string(name: str) -> Callable
+def nonempty_string(name: str) -> Callable[[str], str]
 ```
 
 Ensure a string is non-empty.
@@ -617,7 +617,7 @@ subparser.add_argument(
 
 **Returns**:
 
-- _Callable_ - The decorated function.
+- _Callable[[str], str]_ - The decorated function.
 
 <a id="wvutils.args.safechars_string"></a>
 
@@ -627,7 +627,7 @@ subparser.add_argument(
 def safechars_string(
     name: str,
     allowed_chars: str | set[str] | tuple[str] | list[str] | None = None
-) -> Callable
+) -> Callable[[str], str]
 ```
 
 Ensure a string contains only safe characters.
@@ -649,7 +649,7 @@ subparser.add_argument(
 
 **Returns**:
 
-- _Callable_ - The decorated function.
+- _Callable[[str], str]_ - The decorated function.
 
 <a id="wvutils.general"></a>
 
