@@ -1,11 +1,11 @@
 Most stable version from [**PyPi**](https://pypi.org/project/{{ pypi.name }}/):
 
-[![PyPI](https://img.shields.io/pypi/v/wvutils?style=flat-square)](https://pypi.org/project/{{ pypi.name }}/)
+[![PyPI](https://img.shields.io/pypi/v/{{ pypi.name }}?style=flat-square)](https://pypi.org/project/{{ pypi.name }}/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/{{ pypi.name }}?style=flat-square)](https://pypi.org/project/{{ pypi.name }}/)
 [![PyPI - License](https://img.shields.io/pypi/l/{{ pypi.name }}?style=flat-square)](https://pypi.org/project/{{ pypi.name }}/)
 
 ```bash
-python3 -m pip install wvutils
+python3 -m pip install {{ pypi.name }}
 ```
 
 Development version from [**GitHub**](https://github.com/{{ repo.owner }}/{{ repo.name }}):
@@ -22,6 +22,6 @@ Development version from [**GitHub**](https://github.com/{{ repo.owner }}/{{ rep
 
 ```bash
 git clone git+https://github.com/{{ repo.owner }}/{{ repo.name }}.git
-cd wvutils
+cd {{ repo.name }}
 python3 -m pip install -e .
 ```

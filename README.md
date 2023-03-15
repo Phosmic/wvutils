@@ -298,6 +298,64 @@ Stop the execution of a query in Athena.
 - `qeid` _str_ - Query execution ID of the query to stop.
 - `region_name` _AWSRegion_ - Region name for Athena.
 
+<a id="wvutils.errors"></a>
+
+# `wvutils.errors`
+
+Custom errors.
+
+This module contains custom exceptions that are used throughout the package.
+
+<a id="wvutils.errors.JSONEncodeError"></a>
+
+## `JSONEncodeError` Objects
+
+```python
+class JSONEncodeError(TypeError)
+```
+
+Raised when JSON encoding fails.
+
+<a id="wvutils.errors.JSONDecodeError"></a>
+
+## `JSONDecodeError` Objects
+
+```python
+class JSONDecodeError(TypeError, RapidJSONDecodeError)
+```
+
+Raised when JSON decoding fails.
+
+<a id="wvutils.errors.PickleEncodeError"></a>
+
+## `PickleEncodeError` Objects
+
+```python
+class PickleEncodeError(TypeError, pickle.PicklingError)
+```
+
+Raised when pickling fails.
+
+<a id="wvutils.errors.PickleDecodeError"></a>
+
+## `PickleDecodeError` Objects
+
+```python
+class PickleDecodeError(TypeError, pickle.UnpicklingError)
+```
+
+Raised when unpickling fails.
+
+<a id="wvutils.errors.HashEncodeError"></a>
+
+## `HashEncodeError` Objects
+
+```python
+class HashEncodeError(TypeError, ValueError, AttributeError)
+```
+
+Raised when hashing fails.
+
 <a id="wvutils.path"></a>
 
 # `wvutils.path`
@@ -538,12 +596,12 @@ This module provides utilities for parsing arguments from the command line.
 #### `nonempty_string`
 
 ```python
-def nonempty_string(name: str) -> Callable
+def nonempty_string(name: str) -> Callable[[str], str]
 ```
 
 Ensure a string is non-empty.
 
-Example Usage:
+**Example**:
 
 ```python
 subparser.add_argument(
@@ -559,7 +617,7 @@ subparser.add_argument(
 
 **Returns**:
 
-- _Callable_ - The decorated function.
+- _Callable[[str], str]_ - The decorated function.
 
 <a id="wvutils.args.safechars_string"></a>
 
@@ -569,12 +627,12 @@ subparser.add_argument(
 def safechars_string(
     name: str,
     allowed_chars: str | set[str] | tuple[str] | list[str] | None = None
-) -> Callable
+) -> Callable[[str], str]
 ```
 
 Ensure a string contains only safe characters.
 
-Example Usage:
+**Example**:
 
 ```python
 subparser.add_argument(
@@ -591,7 +649,7 @@ subparser.add_argument(
 
 **Returns**:
 
-- _Callable_ - The decorated function.
+- _Callable[[str], str]_ - The decorated function.
 
 <a id="wvutils.general"></a>
 
@@ -609,10 +667,11 @@ This module provides general utilities for working with Python.
 def count_lines_in_file(file_path: FilePath) -> int
 ```
 
-Count the Number of Lines in a File
+Count the number of lines in a file.
 
-All files have at least 1 line:
-number of lines = # of newlines + 1
+**Notes**:
+
+  All files have at least 1 line (# of lines = # of newlines + 1).
 
 **Arguments**:
 
@@ -630,7 +689,7 @@ number of lines = # of newlines + 1
 def sys_set_recursion_limit() -> None
 ```
 
-Raise Recursion Limit to Allow for More Recurse
+Raise recursion limit to allow for more recurse.
 
 <a id="wvutils.general.gc_set_threshold"></a>
 
@@ -655,7 +714,7 @@ def chunker(seq: Sequence[Any],
             n: int) -> Generator[Sequence[Any], None, None]
 ```
 
-Iterate a Sequence in Chunks
+Iterate a sequence in size `n` chunks.
 
 **Arguments**:
 
@@ -666,6 +725,10 @@ Iterate a Sequence in Chunks
 
 - _Sequence[Any]_ - Chunk of values with length <= n.
 
+**Raises**:
+
+- `ValueError` - If `n` is 0 or negative.
+
 <a id="wvutils.general.is_iterable"></a>
 
 #### `is_iterable`
@@ -674,7 +737,7 @@ Iterate a Sequence in Chunks
 def is_iterable(obj: Any) -> bool
 ```
 
-Check if an Object is Iterable
+Check if an object is iterable.
 
 **Arguments**:
 
@@ -695,7 +758,7 @@ def rename_key(obj: dict,
                in_place: bool = False) -> dict | None
 ```
 
-Rename a Dictionary Key
+Rename a dictionary key.
 
 **Arguments**:
 
@@ -713,10 +776,10 @@ Rename a Dictionary Key
 #### `unnest_key`
 
 ```python
-def unnest_key(obj: dict, *keys: str) -> Any
+def unnest_key(obj: dict, *keys: str) -> Any | None
 ```
 
-Fetch a Value from a Deeply Nested Dictionary
+Fetch a value from a deeply nested dictionary.
 
 **Arguments**:
 
@@ -725,7 +788,7 @@ Fetch a Value from a Deeply Nested Dictionary
 
 **Returns**:
 
-- _Any_ - The result of the provided keys.
+- _Any | None_ - The result of the provided keys, or None if any key is not found.
 
 <a id="wvutils.restruct"></a>
 

@@ -9,7 +9,6 @@ from rapidjson import JSONDecodeError as RapidJSONDecodeError
 __all__ = [
     "HashEncodeError",
     "JSONDecodeError",
-    "JSONDecodeError",
     "JSONEncodeError",
     "PickleDecodeError",
     "PickleEncodeError",
@@ -17,22 +16,22 @@ __all__ = [
 
 
 class JSONEncodeError(TypeError):
-    pass
+    """Raised when JSON encoding fails."""
 
 
 # JSONDecodeError = RapidJSONDecodeError
 # OverflowError might need to be included, but excluding until that time comes.
 class JSONDecodeError(TypeError, RapidJSONDecodeError):  # OverflowError):
-    pass
+    """Raised when JSON decoding fails."""
 
 
 class PickleEncodeError(TypeError, pickle.PicklingError):
-    pass
+    """Raised when pickling fails."""
 
 
 class PickleDecodeError(TypeError, pickle.UnpicklingError):
-    pass
+    """Raised when unpickling fails."""
 
 
 class HashEncodeError(TypeError, ValueError, AttributeError):
-    pass
+    """Raised when hashing fails."""

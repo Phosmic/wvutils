@@ -10,6 +10,7 @@ from moto import mock_s3, mock_secretsmanager
 
 from wvutils.aws import (
     athena_retrieve_query,
+    athena_stop_query,
     boto3_client_ctx,
     clear_boto3_sessions,
     download_from_s3,
@@ -235,10 +236,10 @@ class TestUploadFileToS3(unittest.TestCase):
                 "Hello World!",
             )
 
-    def test_upload_file_to_s3_with_non_existent_file(self):
+    def test_upload_file_to_s3_with_nonexistent_file(self):
         with self.assertRaises(FileNotFoundError):
             upload_file_to_s3(
-                "/tmp/non-existent-file",
+                "/tmp/nonexistent-file",
                 self.bucket_name,
                 self.bucket_path,
                 self.region_name,
@@ -382,7 +383,37 @@ class TestAthenaRetrieveQuery(unittest.TestCase):
             )
         self.assertEqual(state_or_s3_uri, self.s3_output_location)
 
-    def test_query_state_unexpected_type(self):
+    def test_query_state_unexpected_value(self):
+        self.client_mock.get_query_execution.return_value = {
+            "QueryExecution": {
+                "QueryExecutionId": self.query_execution_id,
+                "Status": {"State": "SOMETHING ELSE"},
+            },
+        }
+        with patch("wvutils.aws.Session", return_value=self.session_mock):
+            with self.assertRaises(ValueError):
+                athena_retrieve_query(
+                    self.query_execution_id,
+                    self.database_name,
+                    self.region_name,
+                )
+
+    def test_query_state_unexpected_type_of_None(self):
+        self.client_mock.get_query_execution.return_value = {
+            "QueryExecution": {
+                "QueryExecutionId": self.query_execution_id,
+                "Status": {"State": None},
+            },
+        }
+        with patch("wvutils.aws.Session", return_value=self.session_mock):
+            with self.assertRaises(ValueError):
+                athena_retrieve_query(
+                    self.query_execution_id,
+                    self.database_name,
+                    self.region_name,
+                )
+
+    def test_query_state_unexpected_type_of_int(self):
         self.client_mock.get_query_execution.return_value = {
             "QueryExecution": {
                 "QueryExecutionId": self.query_execution_id,
@@ -397,11 +428,11 @@ class TestAthenaRetrieveQuery(unittest.TestCase):
                     self.region_name,
                 )
 
-    def test_query_state_unexpected_value(self):
+    def test_query_state_unexpected_type_of_float(self):
         self.client_mock.get_query_execution.return_value = {
             "QueryExecution": {
                 "QueryExecutionId": self.query_execution_id,
-                "Status": {"State": "SOMETHING ELSE"},
+                "Status": {"State": 1.1},
             },
         }
         with patch("wvutils.aws.Session", return_value=self.session_mock):
@@ -426,3 +457,23 @@ class TestAthenaRetrieveQuery(unittest.TestCase):
                     self.database_name,
                     self.region_name,
                 )
+
+
+class TestAthenaStopQuery(unittest.TestCase):
+    def setUp(self):
+        self.region_name = "us-east-1"
+        self.query_execution_id = "abc1234d-5efg-67hi-jklm-89n0op12qr34"
+        self.session_mock = Mock()
+        self.client_mock = Mock()
+        self.session_mock.client.return_value = self.client_mock
+
+    def tearDown(self):
+        # Reset the global boto3 sessions
+        clear_boto3_sessions()
+
+    def test_stop_query(self):
+        with patch("wvutils.aws.Session", return_value=self.session_mock):
+            athena_stop_query(self.query_execution_id, self.region_name)
+        self.client_mock.stop_query_execution.assert_called_once_with(
+            QueryExecutionId=self.query_execution_id
+        )

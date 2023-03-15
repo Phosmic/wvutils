@@ -6,6 +6,7 @@
 !test_aws.py
 !test_path.py
 !test_proxies.py
+!test_restruct.py
 !test_utils.py
 
 !LICENSE

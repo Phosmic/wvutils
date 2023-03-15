@@ -7,10 +7,12 @@
     "rendered_filename": "rendered_libs.md",
     "template_data": {
         "pypi": {
-            "name": "wvutils"
+            "name": "wvutils",
+            "full_name": "WVUtils"
         },
         "repo": {
             "name": "wvutils",
+            "full_name": "WVUtils",
             "owner": "Phosmic",
             "badge_style": "flat-square",
             "primary_branch": "master",
