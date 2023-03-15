@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def nonempty_string(name: str) -> Callable[[str], str]:
     """Ensure a string is non-empty.
 
-    Example Usage:
+    Example:
 
     ```python
     subparser.add_argument(
@@ -52,7 +52,7 @@ def safechars_string(
 ) -> Callable[[str], str]:
     """Ensure a string contains only safe characters.
 
-    Example Usage:
+    Example:
 
     ```python
     subparser.add_argument(
